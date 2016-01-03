@@ -97,6 +97,16 @@ void resetController()
 	pos_control.vel_desired.y = 0;
 	pos_control.pos_target.x = inav.position.x;
 	pos_control.pos_target.y = inav.position.y;
+
+	pos_control.throttle_out = pos_control.throttle_hover;
+	pos_control.pitch_out = STICK_MID;
+	pos_control.roll_out = STICK_MID;
+	pos_control.yaw_rate_out = STICK_MID;
+
+	ic_rc_or_data.ic_rc.rc1 = pos_control.roll_out;
+	ic_rc_or_data.ic_rc.rc2 = pos_control.pitch_out;
+	ic_rc_or_data.ic_rc.rc3 = pos_control.throttle_out;
+	ic_rc_or_data.ic_rc.rc4 = pos_control.yaw_rate_out;
 }
 
 /// calc_leash_length - calculates the horizontal leash length given a maximum speed, acceleration and position kP gain

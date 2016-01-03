@@ -128,8 +128,8 @@ void getPilotDesiredXYVelocity()
 	Vector2f pilot_desired_vel, desired_vel;
 	float stick_roll, stick_pitch;
 
-	float deadband_top = MID_STICK_THROTTLE + THROTTLE_DEADZONE;
-	float deadband_bottom = MID_STICK_THROTTLE - THROTTLE_DEADZONE;
+	float deadband_top = STICK_MID + THROTTLE_DEADZONE;
+	float deadband_bottom = STICK_MID - THROTTLE_DEADZONE;
 
 	stick_roll = constrain_float(rc_in[0],THROTTLE_MIN,THROTTLE_MAX);
 	stick_pitch = constrain_float(rc_in[1],THROTTLE_MIN,THROTTLE_MAX);
