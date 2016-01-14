@@ -43,7 +43,7 @@
 // WARNING: state estimation using CV and SONAR are not stable as of now. Switch to CV and SONAR with caution
 #define USE_BARO_NOT_SONAR							1		//0 for sonar 1 for baro
 #define USE_GPS_NOT_CV								1		//0 for cv 1 for GPS
-#define DEBUG_MODE									1		//0 for normal operation 1 for debugging mode
+#define LOGGING_MODE								1		//0 for normal operation 1 for LOGGING controller data
 //=================================================================
 
 #if (USE_BARO_NOT_SONAR == 1)
@@ -76,6 +76,9 @@
  */
 typedef struct
 {
+	float local_x_cm ;			/**< IGNORE added by atulya*/
+	float local_y_cm ;			/**< IGNORE added by atulya*/
+
 	Vector3f position_base; 		/**< base position as calculated by the inertial sensors only #position_base. */
 	Vector3f position_correction; 	/**< position_correction + position_base = position #position_correction. */
 	Vector3f velocity; 				/**< velocity estimate as calculated by the inertial sensors only #velocity. */
@@ -172,5 +175,9 @@ void updateINAVGains(void);
 void setPositionXY(float x, float y);
 
 int isIMUGlitching(void);
+
+void initSystemState(void);
+
+void updateSystemState(void);
 
 #endif /* INERTIAL_NAV_H_ */

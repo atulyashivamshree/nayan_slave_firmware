@@ -77,7 +77,7 @@ void resendParamMavLink(mavlink_channel_t chan, char _name[17], uint8_t param_id
 				 chan,
 				 sysid_thismav,
 				 SYSID, 			//param value
-				 MAVLINK_TYPE_UINT8_T,	//param type
+				 MAV_PARAM_TYPE_UINT8,	//param type
 				 PARAM_COUNT,
 				 sysid_thismav_index);
 	}
@@ -92,7 +92,7 @@ void resendParamMavLink(mavlink_channel_t chan, char _name[17], uint8_t param_id
 			 chan,
 			 sysid_sw_type,
 			 SW_TYPE, 			//param value
-			 MAVLINK_TYPE_UINT8_T,	//param type
+			 MAV_PARAM_TYPE_UINT8,	//param type
 			 PARAM_COUNT,
 			 sysid_sw_type_index);
 	}
@@ -106,7 +106,7 @@ void resendParamMavLink(mavlink_channel_t chan, char _name[17], uint8_t param_id
 			 chan,
 			 sysid_mygcs,
 			 MY_GCS, 			//param value
-			 MAVLINK_TYPE_UINT8_T,	//param type
+			 MAV_PARAM_TYPE_UINT8,	//param type
 			 PARAM_COUNT,
 			 sysid_mygcs_index);
 	}
@@ -331,7 +331,7 @@ void FWupdateParamMavLink(mavlink_channel_t chan, char _name[17], float _paramVa
 				 chan,
 				 sysid_thismav,
 				 SYSID, 			//param value
-				 MAVLINK_TYPE_UINT8_T,	//param type
+				 MAV_PARAM_TYPE_UINT8,	//param type
 				 PARAM_COUNT,
 				 sysid_thismav_index);
 	  }
@@ -346,7 +346,7 @@ void FWupdateParamMavLink(mavlink_channel_t chan, char _name[17], float _paramVa
 				 chan,
 				 sysid_sw_type,
 				 SW_TYPE, 			//param value
-				 MAVLINK_TYPE_UINT8_T,	//param type
+				 MAV_PARAM_TYPE_UINT8,	//param type
 				 PARAM_COUNT,
 				 sysid_sw_type_index);
 		  }
@@ -360,7 +360,7 @@ void FWupdateParamMavLink(mavlink_channel_t chan, char _name[17], float _paramVa
 				 chan,
 				 sysid_mygcs,
 				 MY_GCS, 			//param value
-				 MAVLINK_TYPE_UINT8_T,	//param type
+				 MAV_PARAM_TYPE_UINT8,	//param type
 				 PARAM_COUNT,
 				 sysid_mygcs_index);
 		  }

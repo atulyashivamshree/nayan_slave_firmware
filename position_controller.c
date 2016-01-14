@@ -458,8 +458,8 @@ static void accelToThrottle(float accel_target_z)
 	// get d term
 	d = getPID_D(&pos_control._pid_accel_z);
 
-	debug_vec[0] = p;
-	debug_vec[1] = i;
+	debug_vec.vector.x = p;
+	debug_vec.vector.y = i;
 
 //	debug("integral gain is %f, integral is %f, dt is %f", pos_control._pid_accel_z.kI,
 //														i, pos_control._pid_accel_z.dt);

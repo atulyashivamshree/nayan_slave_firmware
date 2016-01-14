@@ -209,7 +209,7 @@ void update_ic_data(void){
 			sens_gps.alt = _position_gps.z;
 
 			sens_baro.stamp = stamp;
-			sens_baro.position.z = _position_gps.z;
+			sens_baro.depth = _position_gps.z;
 		}
 	}
 

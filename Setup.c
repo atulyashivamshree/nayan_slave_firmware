@@ -353,14 +353,14 @@ void StartTelemetry(void){
 }
 void debug(const char *fmt, ...){
 
-
-	chprintf((BaseSequentialStream *)&SD2, "%s", "Debug: ");
-	va_list ap;
-	va_start(ap, fmt);
-	chvprintf((BaseSequentialStream *)&SD2, fmt, ap);
-	va_end(ap);
-
-	chprintf((BaseSequentialStream *)&SD2, "%s", "\r\n");
+	(void)fmt;
+//	chprintf((BaseSequentialStream *)&SD2, "%s", "Debug: ");
+//	va_list ap;
+//	va_start(ap, fmt);
+//	chvprintf((BaseSequentialStream *)&SD2, fmt, ap);
+//	va_end(ap);
+//
+//	chprintf((BaseSequentialStream *)&SD2, "%s", "\r\n");
 
 }
 /**

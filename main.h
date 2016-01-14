@@ -16,10 +16,7 @@
 #include "inertial_nav.h"
 #include "position_controller.h"
 #include "wp_nav.h"
-
-#define M_PI_F 3.141592653589793f
-#define DEG_TO_RAD 0.017453292519943295769236907684886f
-#define RAD_TO_DEG 57.295779513082320876798154814105f
+#include "OS_PORT/ext/mavlink/v1.0/common/mavlink.h"
 
 #define ARMING_COUNT 175
 
@@ -83,9 +80,43 @@ typedef struct
 	Vector3f accel_ef;
 }AHRS;
 
+typedef struct
+{
+	uint32_t stamp;
+	uint8_t base_mode;
+	uint8_t mav_state;
+
+	//system_status
+	uint8_t system_status;
+	uint32_t onboard_control_sensors_present;
+	uint32_t onboard_control_sensors_enabled;
+	uint32_t onboard_control_sensors_health;
+	uint16_t system_load;
+
+	//vfr_hud
+	float ground_speed;
+	int16_t heading;
+	uint16_t throttle;
+
+	//nav_controller_output
+	int16_t nav_bearing;
+	int16_t target_bearing;
+	uint16_t wp_dist;
+	float alt_error;
+	float aspeed_error;
+	float xtrack_error;
+
+}SystemState;
+
+typedef struct
+{
+	char name[10];
+	Vector3f vector;
+}DebugVec;
+
 extern Sensor_IMU sens_imu; /**< struct holding current imu variables #sens_imu.*/
 extern Sensor_GPS sens_gps;
-extern Sensor_ExtPos sens_baro;
+extern Sensor_Depth sens_baro;
 extern Sensor_ExtPos sens_cv;
 extern Sensor_Depth sens_sonar;
 
@@ -93,15 +124,12 @@ extern AHRS ahrs;
 extern Inertial_nav_data inav; /**< data structure storing the inertial navigation crucial data #inav. */
 extern Position_Controller pos_control;
 extern WP_Nav wp_nav;
+extern SystemState sys_state;
 
 extern Vector3f velocity;
 extern uint16_t rc_in[7];
 
 //variables for debugging sent through sim_state
-extern float debug_vec[2];
-
-//TODO Phase B : remove the temp variables after improving architecture
-extern float local_x_cm;
-extern float local_y_cm;
+extern DebugVec debug_vec;
 
 #endif /* MAIN_H_ */

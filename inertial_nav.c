@@ -31,7 +31,7 @@ int isIMUGlitching(void)
 	accel_diff.x = sens_imu.accel_calib.x - inav.last_good_imu.x;
 	accel_diff.y = sens_imu.accel_calib.y - inav.last_good_imu.y;
 	accel_diff.z = sens_imu.accel_calib.z - inav.last_good_imu.z;
-
+	(void)accel_diff;
 //	q[1] = normVec3f(accel_diff);
 
 //	if(normVec3f(accel_diff) > MAX_ACCEL_CHANGE)
@@ -123,6 +123,7 @@ static int isGPSGlitching(void)
 {
 // calculate time since last sane gps reading in ms
 	float sane_dt = (sens_gps.stamp - inav.last_good_gps_update) / 1000.0f;
+	(void)sane_dt;
 
 	float dlat = sens_gps.lat - inav.last_good_lat;
 	float dlong = sens_gps.lng - inav.last_good_lng;
@@ -163,8 +164,8 @@ static void correctWithGPS(float dt)
 	if(dt > 1.0f || dt <= 0.0f)
 		return;
 
-	local_x_cm = (sens_gps.lat - ahrs.lat_home) * LATLON_TO_CM;
-	local_y_cm = (sens_gps.lng - ahrs.lng_home) * inav.lon_to_cm_scaling;
+	inav.local_x_cm = (sens_gps.lat - ahrs.lat_home) * LATLON_TO_CM;
+	inav.local_y_cm = (sens_gps.lng - ahrs.lng_home) * inav.lon_to_cm_scaling;
 
 //	debug("GPS lat is %d; GPS lng is %d;", sens_gps.lat, sens_gps.lng);
 //	debug("GPS x is %.2f; GPS y is %.2f; deltat is %.2f",x,y,dt);
@@ -173,6 +174,8 @@ static void correctWithGPS(float dt)
 	int glitching_status = isGPSGlitching();
 	if(glitching_status)
 	{
+		//sensor health monitor update
+		sys_state.onboard_control_sensors_health &= (~MAV_SYS_STATUS_SENSOR_GPS);
 		// failed sanity check so degrate position_error to 10% over 2 seconds (assumes 5hz update rate)
 		inav.position_error.x *= 0.7943f;
 		inav.position_error.y *= 0.7943f;
@@ -185,13 +188,15 @@ static void correctWithGPS(float dt)
 		{
 			debug("position base %.2f; position correction is %.2f; position_error is %.2f",
 							inav.position_base.x, inav.position_correction.x, inav.position_error.x);
-			setPositionXY(local_x_cm,local_y_cm);
+			setPositionXY(inav.local_x_cm,inav.local_y_cm);
 			inav.position_error.x = 0.0f;
 			inav.position_error.y = 0.0f;
 		}
 		else
 		{
 			Vector3f historic_position_base;
+			//updating health monitor to indicate that gps is healthy
+			sys_state.onboard_control_sensors_health |= MAV_SYS_STATUS_SENSOR_GPS;
 
 			if(inav.historic_x_property.is_full)
 			{
@@ -205,10 +210,10 @@ static void correctWithGPS(float dt)
 			}
 
 //			debug("position from gps is %.2f; historic_position_base is %.2f; position_correction is %.2f",
-//							local_x_cm, inav.position_base.x, inav.position_correction.x);
+//							inav.local_x_cm, inav.position_base.x, inav.position_correction.x);
 
-			inav.position_error.x = local_x_cm - (historic_position_base.x + inav.position_correction.x);
-			inav.position_error.y = local_y_cm - (historic_position_base.y + inav.position_correction.y);
+			inav.position_error.x = inav.local_x_cm - (historic_position_base.x + inav.position_correction.x);
+			inav.position_error.y = inav.local_y_cm - (historic_position_base.y + inav.position_correction.y);
 		}
 	}
 	inav.flag_gps_glitching = glitching_status;
@@ -226,7 +231,7 @@ static void checkGPS(void)
 	{
 		float dt = (sens_gps.stamp - inav.gps_last)*0.001f;
 		inav.gps_last_update = now;
-		correctWithGPS(dt);
+		correctWithGPS(dt);							//GPS Health is updated inside this function
 		inav.gps_last = sens_gps.stamp;
 	}
 	else
@@ -234,6 +239,9 @@ static void checkGPS(void)
 		// if GPS updates stop arriving degrade position error to 10% over 2 seconds (assumes 100hz update rate)
 		if (now - inav.gps_last_update > AP_INTERTIALNAV_GPS_TIMEOUT_MS)
 		{
+			//GPS Health is updated here
+			sys_state.onboard_control_sensors_health &= (~MAV_SYS_STATUS_SENSOR_GPS);
+
 			inav.position_error.x *= 0.9886f;
 			inav.position_error.y *= 0.9886f;
 		}
@@ -246,6 +254,7 @@ static int isCVGlitching(void)
 {
 // calculate time since last sane gps reading in ms
 	float sane_dt = (sens_cv.stamp - inav.last_good_gps_update) / 1000.0f;
+	(void)sane_dt;
 
 	float dx = sens_cv.position.x - inav.last_good_cv.x;
 	float dy = sens_cv.position.y - inav.last_good_cv.y;
@@ -292,13 +301,14 @@ static void correctWithCV(float dt)
 	if(dt > 1.0f || dt <= 0.0f)
 		return;
 
-	local_x_cm = sens_cv.position.x;
-	local_y_cm = sens_cv.position.y;
+	inav.local_x_cm = sens_cv.position.x;
+	inav.local_y_cm = sens_cv.position.y;
 
 	// sanity check the gps position.  Relies on the main code calling GPS_Glitch::check_position() immediatley after a GPS update
 	int glitching_status = isCVGlitching();
 	if(glitching_status)
 	{
+		sys_state.onboard_control_sensors_health &= (~MAV_SYS_STATUS_SENSOR_VISION_POSITION);
 		// failed sanity check so degrate position_error to 10% over 2 seconds (assumes 30hz update rate)
 		inav.position_error.x *= 0.9624f;
 		inav.position_error.y *= 0.9624f;
@@ -311,12 +321,13 @@ static void correctWithCV(float dt)
 		{
 			debug("position base %.2f; position correction is %.2f; position_error is %.2f",
 							inav.position_base.x, inav.position_correction.x, inav.position_error.x);
-			setPositionXY(local_x_cm,local_y_cm);
+			setPositionXY(inav.local_x_cm,inav.local_y_cm);
 			inav.position_error.x = 0.0f;
 			inav.position_error.y = 0.0f;
 		}
 		else
 		{
+			sys_state.onboard_control_sensors_health |= MAV_SYS_STATUS_SENSOR_VISION_POSITION;
 			Vector3f historic_position_base;
 
 			if(inav.historic_x_property.is_full)
@@ -331,10 +342,10 @@ static void correctWithCV(float dt)
 			}
 
 //			debug("position from gps is %.2f; historic_position_base is %.2f; position_correction is %.2f",
-//							local_x_cm, inav.position_base.x, inav.position_correction.x);
+//							inav.local_x_cm, inav.position_base.x, inav.position_correction.x);
 
-			inav.position_error.x = local_x_cm - (historic_position_base.x + inav.position_correction.x);
-			inav.position_error.y = local_y_cm - (historic_position_base.y + inav.position_correction.y);
+			inav.position_error.x = inav.local_x_cm - (historic_position_base.x + inav.position_correction.x);
+			inav.position_error.y = inav.local_y_cm - (historic_position_base.y + inav.position_correction.y);
 		}
 	}
 	inav.flag_cv_glitching = glitching_status;
@@ -352,14 +363,19 @@ static void checkCV(void)
 	{
 		float dt = (sens_cv.stamp - inav.cv_last)*0.001f;
 		inav.cv_last_update = now;
-		correctWithCV(dt);
+		correctWithCV(dt);						//sensor health monitor is updated inside the function also
+
+		if(sens_cv.flag_active == 0)
+			sys_state.onboard_control_sensors_health &= (~MAV_SYS_STATUS_SENSOR_VISION_POSITION);
 		inav.cv_last = sens_cv.stamp;
 	}
 	else
 	{
-		// if GPS updates stop arriving degrade position error to 10% over 2 seconds (assumes 30hz update rate)
+		// if CV updates stop arriving degrade position error to 10% over 2 seconds (assumes 30hz update rate)
 		if (now - inav.cv_last_update > AP_INTERTIALNAV_GPS_TIMEOUT_MS)
 		{
+			//update sensor health monitor
+			sys_state.onboard_control_sensors_health &= (~MAV_SYS_STATUS_SENSOR_VISION_POSITION);
 			inav.position_error.x *= 0.9624f;
 			inav.position_error.y *= 0.9624f;
 		}
@@ -372,8 +388,9 @@ static int isBaroGlitching(void)
 {
 	// calculate time since last sane gps reading in ms
 	float sane_dt = (sens_baro.stamp - inav.last_good_gps_update) / 1000.0f;
+	(void)sane_dt;
 
-	float distance_cm = sens_baro.position.z - inav.last_good_baro.z;
+	float distance_cm = sens_baro.depth - inav.last_good_baro.z;
 //	debug("distance to last_good_baro is %.2f", distance_cm);
 
 	int all_ok = 1;
@@ -385,19 +402,19 @@ static int isBaroGlitching(void)
 		all_ok = 0;
 	}
 
-	if(sens_baro.position.z == 0)
+	if(sens_baro.depth == 0)
 	{
 		all_ok = 0;
 	}
 
 	if(all_ok == 1)
 	{
-		inav.last_good_baro.z = sens_baro.position.z;
+		inav.last_good_baro.z = sens_baro.depth;
 		inav.last_good_baro_update = sens_baro.stamp;
 	}
 	else
 	{
-		debug("BARO glitched. previous baro reading is %.2f; Current baro reading is %.2f", inav.last_good_baro.z, sens_baro.position.z);
+		debug("BARO glitched. previous baro reading is %.2f; Current baro reading is %.2f", inav.last_good_baro.z, sens_baro.depth);
 	}
 	return (!all_ok);
 }
@@ -412,14 +429,16 @@ static void correctWithBaro(float dt)
 	if(dt > 1.0f || dt <= 0.0f)
 		return;
 
-//	local_x_cm = sens_baro.position.x*100;
-//	local_y_cm = sens_baro.position.y*100;
-	float z = sens_baro.position.z;
+//	inav.local_x_cm = sens_baro.position.x*100;
+//	inav.local_y_cm = sens_baro.position.y*100;
+	float z = sens_baro.depth;
 
 	// sanity check the gps position.  Relies on the main code calling GPS_Glitch::check_position() immediatley after a GPS update
 	int glitching_status = isBaroGlitching();
 	if(glitching_status)
 	{
+		//UPDATE SENSOR HEALTH
+		sys_state.onboard_control_sensors_health &= (~MAV_SYS_STATUS_SENSOR_DIFFERENTIAL_PRESSURE);
 		// failed sanity check so degrate position_error to 10% over 2 seconds (assumes 10hz update rate)
 //		inav.position_error.x *= 0.7943f;
 //		inav.position_error.y *= 0.7943f;
@@ -434,12 +453,15 @@ static void correctWithBaro(float dt)
 			debug("Z : baro: %z pos base %.2f; pos_correction is %.2f; pos_error is %.2f",
 							z, inav.position_base.z, inav.position_correction.z, inav.position_error.z);
 
-//			setPositionXY(local_x_cm,local_y_cm);
+//			setPositionXY(inav.local_x_cm,inav.local_y_cm);
 			setAltitude(z);
 			inav.position_error.z = 0;
 		}
 		else
 		{
+			//UPDATE SENSOR HEALTH
+			sys_state.onboard_control_sensors_health |= MAV_SYS_STATUS_SENSOR_DIFFERENTIAL_PRESSURE;
+
 			Vector3f historic_position_base;
 
 //			if(inav.historic_x_property.is_full)
@@ -460,8 +482,8 @@ static void correctWithBaro(float dt)
 //			debug("position from baro is %.2f; historic_position_base is %.2f; position_correction is %.2f",
 //							z, inav.position_base.z, inav.position_correction.z);
 
-//			inav.position_error.x = local_x_cm - (historic_position_base.x + inav.position_correction.x);
-//			inav.position_error.y = local_y_cm - (historic_position_base.y + inav.position_correction.y);
+//			inav.position_error.x = inav.local_x_cm - (historic_position_base.x + inav.position_correction.x);
+//			inav.position_error.y = inav.local_y_cm - (historic_position_base.y + inav.position_correction.y);
 			inav.position_error.z = z - (historic_position_base.z + inav.position_correction.z);
 		}
 	}
@@ -487,6 +509,8 @@ static void checkBaro(void)
 		// if EXT POS updates stop arriving degrade position error to 10% over 2 seconds (assumes 100hz update rate)
 		if (now - inav.baro_last_update > AP_INTERTIALNAV_GPS_TIMEOUT_MS)
 		{
+			//update sensor health
+			sys_state.onboard_control_sensors_health &= (~MAV_SYS_STATUS_SENSOR_DIFFERENTIAL_PRESSURE);
 //			inav.position_error.x *= 0.9886f;
 //			inav.position_error.y *= 0.9886f;
 			inav.position_error.z *= 0.9886f;
@@ -498,6 +522,8 @@ static int isSonarGlitching(void)
 {
 	// calculate time since last sane gps reading in ms
 	float sane_dt = (sens_sonar.stamp - inav.last_good_sonar_update) / 1000.0f;
+	(void)sane_dt;													//TODO some unused variable warning has been suppressed using (void)
+																	//Decide whether to use them or not
 
 	float distance_cm = sens_sonar.depth - inav.last_good_sonar;
 //	debug("distance to last_good_lat is %.2f", distance_cm);
@@ -546,6 +572,8 @@ static void correctWithSonar(float dt)
 	int glitching_status = isSonarGlitching();
 	if(glitching_status)
 	{
+		//update sensor health sonar status is published on the laser position
+		sys_state.onboard_control_sensors_health &= (~MAV_SYS_STATUS_SENSOR_LASER_POSITION);
 		// failed sanity check so degrate position_error to 10% over 2 seconds (assumes 10hz update rate)
 		inav.position_error.z *= 0.89125f;
 	}
@@ -563,6 +591,7 @@ static void correctWithSonar(float dt)
 		}
 		else
 		{
+			sys_state.onboard_control_sensors_health |= MAV_SYS_STATUS_SENSOR_LASER_POSITION;
 			Vector3f historic_position_base;
 
 			if(inav.historic_z_property.is_full)
@@ -596,6 +625,7 @@ static void checkSonar(void)
 		// if EXT POS updates stop arriving degrade position error to 10% over 2 seconds (assumes 100hz update rate)
 		if (now - inav.sonar_last_update > AP_INTERTIALNAV_GPS_TIMEOUT_MS)
 		{
+			sys_state.onboard_control_sensors_health &= (~MAV_SYS_STATUS_SENSOR_LASER_POSITION);
 			inav.position_error.z *= 0.9886f;
 		}
 	}
@@ -670,12 +700,12 @@ void initializeAlt()
 	}
 
 #if (USE_BARO_NOT_SONAR == 1)
-	inav.position_base.z = sens_baro.position.z;
-	inav.last_good_baro.z = sens_baro.position.z;
+	inav.position_base.z = sens_baro.depth;
+	inav.last_good_baro.z = sens_baro.depth;
 	inav.last_good_baro_update = sens_baro.stamp;
 	inav.position_correction.z = 0.0f;
-	inav.position.z = sens_baro.position.z;				//set initial altitude to whatever value is reached
-	debug("Received Baro data. Altitude is %f", sens_baro.position.z);
+	inav.position.z = sens_baro.depth;				//set initial altitude to whatever value is reached
+	debug("Received Baro data. Altitude is %f", sens_baro.depth);
 #else
 	inav.position_base.z = sens_sonar.depth;
 	inav.last_good_baro.z = sens_sonar.depth;
@@ -702,6 +732,10 @@ void initINAV()
 	resetQueue(inav.historic_x, &inav.historic_x_property);
 	resetQueue(inav.historic_y, &inav.historic_y_property);
 	resetQueue(inav.historic_z, &inav.historic_z_property);
+
+	//initialize local xy
+	inav.local_x_cm = 0;
+	inav.local_y_cm = 0;
 
 	//update the gain parameters
 	inav.time_constant_xy = AP_INTERTIALNAV_TC_XY;
@@ -899,5 +933,62 @@ void updateINAV(uint32_t del_t)
 //		printQueue(inav.historic_x, inav.historic_x_property);
 		pushToQueue(inav.position_base.y, inav.historic_y, &inav.historic_y_property);
 	}
-
 }
+
+void initSystemState(void)
+{
+	sys_state.onboard_control_sensors_present = MAV_SYS_STATUS_SENSOR_3D_GYRO | MAV_SYS_STATUS_SENSOR_3D_ACCEL |
+			MAV_SYS_STATUS_SENSOR_DIFFERENTIAL_PRESSURE | MAV_SYS_STATUS_SENSOR_GPS |
+			MAV_SYS_STATUS_SENSOR_LASER_POSITION | MAV_SYS_STATUS_SENSOR_VISION_POSITION |
+			MAV_SYS_STATUS_SENSOR_XY_POSITION_CONTROL | MAV_SYS_STATUS_SENSOR_Z_ALTITUDE_CONTROL |
+			MAV_SYS_STATUS_SENSOR_RC_RECEIVER |
+			MAV_SYS_STATUS_AHRS;
+
+	sys_state.onboard_control_sensors_enabled = MAV_SYS_STATUS_SENSOR_3D_GYRO | MAV_SYS_STATUS_SENSOR_3D_ACCEL |
+			MAV_SYS_STATUS_SENSOR_XY_POSITION_CONTROL | MAV_SYS_STATUS_SENSOR_Z_ALTITUDE_CONTROL |
+			MAV_SYS_STATUS_SENSOR_RC_RECEIVER |
+			MAV_SYS_STATUS_AHRS;
+
+	if(USE_BARO_NOT_SONAR == 1)
+		sys_state.onboard_control_sensors_enabled = sys_state.onboard_control_sensors_enabled | MAV_SYS_STATUS_SENSOR_DIFFERENTIAL_PRESSURE;
+	else
+		sys_state.onboard_control_sensors_enabled = sys_state.onboard_control_sensors_enabled | MAV_SYS_STATUS_SENSOR_LASER_POSITION;
+
+	if(USE_GPS_NOT_CV == 1)
+		sys_state.onboard_control_sensors_enabled = sys_state.onboard_control_sensors_enabled | MAV_SYS_STATUS_SENSOR_GPS;
+	else
+		sys_state.onboard_control_sensors_enabled = sys_state.onboard_control_sensors_enabled | MAV_SYS_STATUS_SENSOR_VISION_POSITION;
+
+	sys_state.onboard_control_sensors_health = MAV_SYS_STATUS_SENSOR_3D_GYRO | MAV_SYS_STATUS_SENSOR_3D_ACCEL |
+			MAV_SYS_STATUS_SENSOR_RC_RECEIVER |
+			MAV_SYS_STATUS_AHRS;
+	sys_state.base_mode = MAV_MODE_GUIDED_DISARMED;
+	sys_state.system_status = MAV_STATE_UNINIT;
+
+	strncpy(debug_vec.name, "uninit", 10);
+	debug_vec.vector.x = 1.2;
+	debug_vec.vector.y = -0.5;
+	debug_vec.vector.z = 3.1;
+}
+
+void updateSystemState(void)
+{
+	Vector2f velxy;
+	velxy = (Vector2f){inav.velocity.x, inav.velocity.y};
+
+	//vfr_hud
+	sys_state.ground_speed = normVec2f(velxy)/100.0f;
+	sys_state.heading = (int16_t)(ahrs.attitude.z*RAD_TO_DEG);
+	sys_state.throttle = (uint16_t)(pos_control.throttle_out - THROTTLE_MIN)/(THROTTLE_MAX - THROTTLE_MIN);
+
+	//nav_controller_output
+	sys_state.nav_bearing = (int16_t)(wp_nav.waypoint_yaw*RAD_TO_DEG);
+	sys_state.target_bearing = 0.0f;
+	Vector2f dist_error;
+	dist_error = (Vector2f){pos_control.pos_target.x - inav.position.x, pos_control.pos_target.y - inav.position.y};
+	sys_state.wp_dist = 0.0f;
+	sys_state.alt_error = (pos_control.pos_target.z - inav.position.z)/100.0f;
+	sys_state.xtrack_error = normVec2f(dist_error)/100.0f;
+	sys_state.aspeed_error = 0.0f;
+}
+
