@@ -58,7 +58,6 @@ void initializeWPNav()
 	wp_nav._flags.recalc_wp_leash = 0;
 	wp_nav._flags.new_wp_destination = 0;
 
-	initializeLPF(&wp_nav.channel6_filter, 0.8);
 }
 
 void loiter_run()
@@ -84,7 +83,7 @@ void loiter_run()
 			wp_nav.flag_auto_wp_enable = 1;
 		}
 
-		//DISABLE AUTO_WPNAV mode if sticks have been disturbed
+		//If previsously system was in AUTO_WPNAV mode and sticks have been disturbed DISABLE it
 		// (if previously it was enabled it will be disabled in AUTO_WPNAV_COUNT_THRESHOLD/4*0.02 seconds)
 		if(wp_nav.count_wp_enable < AUTO_WPNAV_COUNT_THRESHOLD*3.0/4 && wp_nav.flag_auto_wp_enable == 1)
 		{
@@ -99,26 +98,26 @@ void loiter_run()
 		}
 		else
 		{
-			resetWaypoint();
+			//IMPORTANT : If no new waypoint has been sent targets are decided according to the stick inputs
 			getPilotDesiredXYVelocity();
 //			getPilotDesiredAcceleration();
 			getPilotClimbRate();
-//			debug("Flying in LOITER mode with stick inputs translating to velocity");
+			resetWaypoint();
 		}
 
 		getPilotDesiredYawRate();
 
 		wp_nav._last_pilot_update_ms = now;
 	}
+
+	// XY and yaw control
 	updateLoiter();
 	setAttitude(pos_control.roll_target, pos_control.pitch_target, wp_nav._pilot_desired_yaw_rate);
 
-	//Alt hold control code
+	// Alt hold control code
 	//set target altitude based on the desired climb rate
 	setAltTargetfromClimbRate(wp_nav._pilot_desired_climb_rate, POSCONTROL_DT_100HZ);
-
 	updateZController();
-
 	// send throttle to attitude controller with angle boost
 	setThrottleOut(pos_control.throttle_in, 1, POSCONTROL_THROTTLE_CUTOFF_FREQ);
 
@@ -191,7 +190,7 @@ void getWPNavDesiredVelocity()
 		velocity_xy_des.y = velocity_xy_des.y * WPNAV_LOITER_SPEED_MIN/vel_xy;
 	}
 
-	if(abs(velocity_z_des) > WPNAV_WP_SPEED_DOWN && abs(velocity_z_des)>0)
+	if(fabs(velocity_z_des) > WPNAV_WP_SPEED_DOWN && fabs(velocity_z_des)>0)
 	{
 		if(velocity_z_des > 0)
 			velocity_z_des = WPNAV_WP_SPEED_DOWN;
@@ -229,19 +228,11 @@ void getPilotDesiredXYVelocity()
 	float deadband_top = MID_STICK_THROTTLE + THROTTLE_DEADZONE;
 	float deadband_bottom = MID_STICK_THROTTLE - THROTTLE_DEADZONE;
 
-	//failsafe to detect any unwanted output
-	if(isnan(rc_in[0])|| isnan(rc_in[1]))
-		return;
-
-	if(isinf(rc_in[0])|| isinf(rc_in[1]))
-		return;
-
 	if(rc_in[0] < THROTTLE_MIN || rc_in[0] > THROTTLE_MAX)
 		return;
 
 	if(rc_in[1] < THROTTLE_MIN || rc_in[1] > THROTTLE_MAX)
 		return;
-
 
 	stick_roll = constrain_float(rc_in[0],THROTTLE_MIN,THROTTLE_MAX);
 	stick_pitch = constrain_float(rc_in[1],THROTTLE_MIN,THROTTLE_MAX);
@@ -321,12 +312,6 @@ void getPilotDesiredYawRate()
 
 void getPilotClimbRate()
 {
-	if(isnan(rc_in[2]))
-		return;
-
-	if(isinf(rc_in[2]))
-		return;
-
 	if(rc_in[2] < THROTTLE_MIN || rc_in[2] > THROTTLE_MAX)
 		return;
 

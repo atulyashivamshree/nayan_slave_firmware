@@ -180,4 +180,8 @@ void initSystemState(void);
 
 void updateSystemState(void);
 
+void checkArmingStatus(float dt);
+
+bool_t isSlaveActive(void);
+
 #endif /* INERTIAL_NAV_H_ */

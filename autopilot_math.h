@@ -179,7 +179,7 @@ void pushToQueue(float data, float arr[], Queue_property *q_property);
 
 ////////////----Low Pass Filter-------/////////////
 // intialize the state and cutoff frequency of the lpf
-void initializeLPF(LowPassFilter *lpf, float frequency);
+void initializeLPF(LowPassFilter *lpf, float outp, float frequency);
 
 // reset the state of the LPF to the current value
 void resetLPF(LowPassFilter *lpf, float val);

@@ -137,7 +137,6 @@ typedef struct ap_waypoint_nav
     Vector3f    _hermite_spline_solution[4]; // array describing spline path between origin and destination
     float       _spline_vel_scaler;	    //
     float       _yaw;                   // heading according to yaw
-    LowPassFilter		channel6_filter;// IGNORE channel6 values as filtered by the user
 }WP_Nav;
 
 void updateLoiter(void);

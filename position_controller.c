@@ -61,10 +61,10 @@ void initializePosController()
 	pos_control.accel_target_jerk_limited.x = 0.0f;
 	pos_control.accel_target_jerk_limited.y = 0.0f;
 
-	initializeLPF(&pos_control.vel_error_filter, POSCONTROL_VEL_ERROR_CUTOFF_FREQ);
-	initializeLPF(&pos_control.accel_target_filter_x, POSCONTROL_ACCEL_FILTER_HZ);
-	initializeLPF(&pos_control.accel_target_filter_y, POSCONTROL_ACCEL_FILTER_HZ);
-	initializeLPF(&pos_control.throttle_in_filter, POSCONTROL_THROTTLE_CUTOFF_FREQ);
+	initializeLPF(&pos_control.vel_error_filter, 0.0f, POSCONTROL_VEL_ERROR_CUTOFF_FREQ);
+	initializeLPF(&pos_control.accel_target_filter_x, 0.0f, POSCONTROL_ACCEL_FILTER_HZ);
+	initializeLPF(&pos_control.accel_target_filter_y, 0.0f, POSCONTROL_ACCEL_FILTER_HZ);
+	initializeLPF(&pos_control.throttle_in_filter, pos_control.throttle_out, POSCONTROL_THROTTLE_CUTOFF_FREQ);
 	// initialise flags
 
 	pos_control._flags.recalc_leash_z = 1;
@@ -110,6 +110,8 @@ void resetController()
 	ic_rc_or_data.ic_rc.rc3 = pos_control.throttle_out;
 	ic_rc_or_data.ic_rc.rc4 = pos_control.yaw_rate_out;
 
+	resetLPF(&pos_control.throttle_in_filter, pos_control.throttle_out);
+	pos_control._flags.reset_accel_to_lean_xy = 1;
 }
 
 /// calc_leash_length - calculates the horizontal leash length given a maximum speed, acceleration and position kP gain
@@ -183,6 +185,8 @@ static float sqrtController(float error, float p, float second_ord_lim)
 
 static void posToRateXY(int mode, float dt)
 {
+	(void)dt;
+
     Vector3f curr_pos = inav.position;
     float linear_distance;      // the distance we swap between linear and sqrt velocity response
     float kP = 1.0* pos_control._p_pos_xy.kP; // scale gains to compensate for noisy optical flow measurement in the EKF
@@ -458,9 +462,6 @@ static void accelToThrottle(float accel_target_z)
 	// get d term
 	d = getPID_D(&pos_control._pid_accel_z);
 
-	debug_vec.vector.x = p;
-	debug_vec.vector.y = i;
-
 //	debug("integral gain is %f, integral is %f, dt is %f", pos_control._pid_accel_z.kI,
 //														i, pos_control._pid_accel_z.dt);
 	pos_control.throttle_in = p+i+d+pos_control.param_throttle_hover;
@@ -637,21 +638,21 @@ void updateZController()
 }
 void setAttitude(float roll, float pitch, float yaw_rate)
 {
-	int16_t roll_out, pitch_out, yaw_rate_out;
+	int16_t roll_out = STICK_MID, pitch_out = STICK_MID, yaw_rate_out = STICK_MID;
 
+	if(roll == 0.0f)
+		roll_out = STICK_MID;
 	if(roll < 0)
 		roll_out = STICK_MID + DEGREE_TO_STICK*roll - STICK_DEADBAND_ZONE;
 	if(roll > 0)
 		roll_out = STICK_MID + DEGREE_TO_STICK*roll + STICK_DEADBAND_ZONE;
-	if(roll == 0)
-		roll_out = STICK_MID;
 
+	if(pitch == 0.0f)
+		pitch_out = STICK_MID;
 	if(pitch < 0)
 		pitch_out = STICK_MID + DEGREE_TO_STICK*pitch - STICK_DEADBAND_ZONE;
 	if(pitch > 0)
 		pitch_out = STICK_MID + DEGREE_TO_STICK*pitch + STICK_DEADBAND_ZONE;
-	if(pitch == 0)
-		pitch_out = STICK_MID;
 
 	yaw_rate_out = STICK_MID + DEGREEPS_TO_STICK*yaw_rate;
 

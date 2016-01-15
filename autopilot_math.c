@@ -68,9 +68,9 @@ void pushToQueue(float data, float arr[], Queue_property *q_property)
 		q_property->is_full = 0;
 }
 
-void initializeLPF(LowPassFilter *lpf, float frequency)
+void initializeLPF(LowPassFilter *lpf, float outp, float frequency)
 {
-	lpf->output = 0;
+	lpf->output = outp;
 	lpf->cutoff_freq = frequency;
 }
 
@@ -83,8 +83,8 @@ float applyLPF(LowPassFilter *lpf, float input, float dt)
 	}
 
 	float rc = 1.0f/(2*M_PI_F*lpf->cutoff_freq);
-	float alpha = constrain_float(dt/(dt+rc), 0.0f, 1.0f);
-	lpf->output += (input - lpf->output) * alpha;
+	lpf->alpha = constrain_float(dt/(dt+rc), 0.0f, 1.0f);
+	lpf->output += (input - lpf->output) * lpf->alpha;
 
 	return lpf->output;
 }

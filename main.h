@@ -18,7 +18,7 @@
 #include "wp_nav.h"
 #include "OS_PORT/ext/mavlink/v1.0/common/mavlink.h"
 
-#define ARMING_COUNT 175
+#define ARMING_TIME 1.75f
 
 /**
  * @brief stores the raw imu variables acceleration and the angular velocity
@@ -85,6 +85,11 @@ typedef struct
 	uint32_t stamp;
 	uint8_t base_mode;
 	uint8_t mav_state;
+	uint8_t flag_armed;
+	uint8_t flag_arming;
+	float arming_count;
+	float disarming_count;
+	LowPassFilter channel7_filter;
 
 	//system_status
 	uint8_t system_status;

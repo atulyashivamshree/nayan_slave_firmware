@@ -965,6 +965,8 @@ void initSystemState(void)
 	sys_state.base_mode = MAV_MODE_GUIDED_DISARMED;
 	sys_state.system_status = MAV_STATE_UNINIT;
 
+	initializeLPF(&sys_state.channel7_filter, STICK_MIN, 0.8);
+
 	strncpy(debug_vec.name, "uninit", 10);
 	debug_vec.vector.x = 1.2;
 	debug_vec.vector.y = -0.5;
@@ -992,3 +994,54 @@ void updateSystemState(void)
 	sys_state.aspeed_error = 0.0f;
 }
 
+inline void checkArmingStatus(float dt)
+{
+	//CONDITION FOR MOTORS BEING ARMED(Note that these values may need to recalibrated in case remote is changed)
+	if(rc_in[2] < (STICK_MIN + 80) && rc_in[3] > (STICK_MAX - 80)) {
+		if(sys_state.arming_count < ARMING_TIME)			//pressed continuously for 1 sec @100Hz
+			sys_state.arming_count += dt;
+	}
+	else {
+		if(sys_state.arming_count > 0.0f)
+			sys_state.arming_count -= dt;
+	}
+
+	//================check for disarming================
+	if(rc_in[2] < (STICK_MIN + 80) && rc_in[3] < (STICK_MIN + 80)) {
+		if(sys_state.disarming_count < ARMING_TIME)			//pressed continuously for 1 sec @100Hz
+			sys_state.disarming_count += dt;
+	}
+	else {
+		if(sys_state.disarming_count > 0.0f)
+			sys_state.disarming_count -= dt;
+	}
+
+	//====assign flags based on the current status of the code=========
+	if(sys_state.flag_armed == 0 && sys_state.arming_count >= ARMING_TIME)
+	{
+		sys_state.flag_armed = 1;
+		sys_state.flag_arming = 1;
+		sys_state.base_mode = MAV_MODE_GUIDED_ARMED;
+
+	}
+	else
+		sys_state.flag_arming = 0;
+
+	if(sys_state.flag_armed == 1 && sys_state.disarming_count >= ARMING_TIME)
+	{
+		sys_state.flag_armed = 0;
+		sys_state.base_mode = MAV_MODE_GUIDED_DISARMED;
+
+	}
+}
+
+inline bool_t isSlaveActive(void)
+{
+	float chnl7_out = applyLPF(&sys_state.channel7_filter, rc_in[6], 0.01);
+	debug_vec.vector.x = chnl7_out;
+	//(Note that these values may need to recalibrated in case remote is changed)
+	if(chnl7_out > (2000 + 917)/2)
+		return TRUE;
+	else
+		return FALSE;
+}
