@@ -235,6 +235,7 @@ static msg_t mavlinkSend(void *arg) {
   while (TRUE) {
 
 	  if(hbt_cnt > 200){
+		  palTogglePad(GPIOC, 1);
 		  send_heart_beat();
 		  hbt_cnt = 0;
 	  }
