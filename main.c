@@ -69,6 +69,8 @@ int main(void)
 
 	delay(1000);
 
+	debug("intializing");
+
 	odroid_comm_init();
 	initializePosController();
 	resetController();
@@ -115,6 +117,7 @@ int main(void)
 			FLAG_ARMING = 0;
 
 		delay(10);
+		debug("Alive");
 
 		uint32_t stop = chTimeNow();
 		float duration = (stop-start)/0.1f;

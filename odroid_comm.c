@@ -236,6 +236,7 @@ static msg_t mavlinkSend(void *arg) {
 
 	  if(hbt_cnt > 200){
 		  palTogglePad(GPIOC, 1);
+		  debug("Odroid alive");
 		  send_heart_beat();
 		  hbt_cnt = 0;
 	  }

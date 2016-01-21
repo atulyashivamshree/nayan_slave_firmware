@@ -684,6 +684,7 @@ void initializeAlt()
 		if(sens_sonar.stamp != 0)
 				flag_EXT_POS_HOME_FOUND = 1;
 #endif
+		debug("waiting for altitude");
 		delay(100);
 	}
 

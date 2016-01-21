@@ -501,6 +501,8 @@ static msg_t IC_THD(void *arg) {
 		sanity = FALSE;
 		new_data = FALSE;
 
+		debug("IC");
+
 		delay(4);
   }
   return 0;
