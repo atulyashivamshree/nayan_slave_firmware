@@ -8,16 +8,19 @@
 
 #include "main.h"
 
-static void printQueue(float arr[], Queue_property q_property)
-{
-	debug("Size = %d ; Front = %d; Last = %d; is_full = %d; is_empty = %d\n",
-		q_property.size, q_property.first, q_property.last, q_property.is_full, q_property.is_empty);
-
-	int i;
-	for(i=0; i<q_property.size; i++)
-		debug("%1.2f ", arr[i]);
-	debug("\n");
-}
+/**
+ * @brief print contents of a queue and its corresponding array on the debug channel on SD2
+ */
+//static void printQueue(float arr[], Queue_property q_property)
+//{
+//	debug("Size = %d ; Front = %d; Last = %d; is_full = %d; is_empty = %d\n",
+//		q_property.size, q_property.first, q_property.last, q_property.is_full, q_property.is_empty);
+//
+//	int i;
+//	for(i=0; i<q_property.size; i++)
+//		debug("%1.2f ", arr[i]);
+//	debug("\n");
+//}
 
 int isIMUGlitching(void)
 {
@@ -353,7 +356,7 @@ static void correctWithCV(float dt)
 }
 
 /**
- * @brief update navigation velocity and position based on GPS feedback if new available
+ * @brief update navigation velocity and position based on CV feedback if new available
  */
 static void checkCV(void)
 {
@@ -835,6 +838,7 @@ void updateINAV(uint32_t del_t)
 	float dt = del_t * 0.001f;
 
 //	debug("delta_time for INAV is %.2f", dt);
+	inav.last_imu_stamp = sens_imu.stamp;
 
 	if(dt > INERTIAL_NAV_DELTAT_MAX)
 		return;
@@ -975,8 +979,27 @@ void initSystemState(void)
 
 void updateSystemState(void)
 {
+	uint32_t now = millis();
+
 	Vector2f velxy;
 	velxy = (Vector2f){inav.velocity.x, inav.velocity.y};
+
+	//update the state for control
+#if (USE_GPS_NOT_CV == 1)
+	sys_state.onboard_control_sensors_health |= MAV_SYS_STATUS_SENSOR_XY_POSITION_CONTROL;
+#else
+	if(pos_control._flags.xy_control_to_pilot)
+		sys_state.onboard_control_sensors_health |= MAV_SYS_STATUS_SENSOR_XY_POSITION_CONTROL;
+	else
+		sys_state.onboard_control_sensors_health &= ~MAV_SYS_STATUS_SENSOR_XY_POSITION_CONTROL;
+#endif
+
+#if (USE_BARO_NOT_SONAR == 1)
+	sys_state.onboard_control_sensors_health |= MAV_SYS_STATUS_SENSOR_Z_ALTITUDE_CONTROL;
+#else
+	sys_state.onboard_control_sensors_health |= MAV_SYS_STATUS_SENSOR_Z_ALTITUDE_CONTROL;
+
+#endif
 
 	//vfr_hud
 	sys_state.ground_speed = normVec2f(velxy)/100.0f;
@@ -992,6 +1015,13 @@ void updateSystemState(void)
 	sys_state.alt_error = (pos_control.pos_target.z - inav.position.z)/100.0f;
 	sys_state.xtrack_error = normVec2f(dist_error)/100.0f;
 	sys_state.aspeed_error = 0.0f;
+
+	//if AHRS has timed out update the status for it
+	if((now - ahrs.stamp) > AP_INTERTIALNAV_GPS_TIMEOUT_MS)
+		sys_state.onboard_control_sensors_health &= (~MAV_SYS_STATUS_AHRS);
+	else
+		sys_state.onboard_control_sensors_health |= MAV_SYS_STATUS_AHRS;
+
 }
 
 inline void checkArmingStatus(float dt)

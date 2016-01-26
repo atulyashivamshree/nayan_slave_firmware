@@ -28,7 +28,7 @@
 // so they can later be compared to laggy gps readings
 #define AP_INTERTIALNAV_GPS_TIMEOUT_MS              300     // timeout after which position error from GPS will fall to zero
 
-#define COUNT_Z_DELAY_BARO							15
+#define COUNT_Z_DELAY_BARO							2
 #define COUNT_Z_DELAY_SONAR							20
 		// assuming a 150 ms delay for the baro data if the AHRS is called at 100Hz
 #define GPS_RADIUS_CM								400
@@ -48,13 +48,13 @@
 
 #if (USE_BARO_NOT_SONAR == 1)
 	#define AP_HISTORIC_Z_SIZE						COUNT_Z_DELAY_BARO
-	#define AP_INTERTIALNAV_TC_Z    				1.0f // default time constant for complementary filter's Z axis
+	#define AP_INTERTIALNAV_TC_Z    				2.5f // default time constant for complementary filter's Z axis
 	#define POSTARGET_MAX_ALTITUDE					1000
 	#define POSTARGET_MIN_ALTITUDE					-1000
 #else
 	#define AP_HISTORIC_Z_SIZE						COUNT_Z_DELAY_SONAR
 	#define AP_INTERTIALNAV_TC_Z    				1.0f // default time constant for complementary filter's Z axis
-	#define POSTARGET_MAX_ALTITUDE					350
+	#define POSTARGET_MAX_ALTITUDE					250
 	#define POSTARGET_MIN_ALTITUDE					50
 
 #endif
@@ -63,7 +63,7 @@
 	#define AP_INTERTIALNAV_SAVE_POS_AFTER_ITERATIONS   10
 	#define AP_HISTORIC_XY_SIZE							5
 	#define AP_INTERTIALNAV_GPS_LAG_IN_10HZ_INCREMENTS  4       // must not be larger than size of _hist_position_estimate_x and _hist_position_estimate_y
-	#define AP_INTERTIALNAV_TC_XY   					2.5f 	// default time constant for complementary filter's X & Y axis
+	#define AP_INTERTIALNAV_TC_XY   					2.0f 	// default time constant for complementary filter's X & Y axis
 #else
 	#define AP_INTERTIALNAV_SAVE_POS_AFTER_ITERATIONS   1
 	#define AP_HISTORIC_XY_SIZE							5
@@ -117,6 +117,7 @@ typedef struct
 
 	Vector3f last_good_imu;
 	uint32_t last_good_imu_update;
+	uint32_t last_imu_stamp;
 
 	float time_constant_xy;			/**< PARAM time constant for the gain parameters #time_constant_xy.*/
 	float time_constant_z;			/**< PARAM time constant for the gain parameters #time_constant_z.*/

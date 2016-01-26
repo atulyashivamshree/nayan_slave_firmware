@@ -23,7 +23,7 @@
 #define DEGREE_TO_STICK							185.0f/10.0f	//Based on roll stick test by giving a command of 200 and checking the response angle in degree
 #define STICK_DEADBAND							15
 #define THROTTLE_OUTPUT_MAX						1700
-#define THROTTLE_OUTPUT_MIN						1300
+#define THROTTLE_OUTPUT_MIN						1000
 #define RP_OUTPUT_MAX							1700
 #define RP_OUTPUT_MIN							1300
 #define YAW_OUTPUT_MAX							1800

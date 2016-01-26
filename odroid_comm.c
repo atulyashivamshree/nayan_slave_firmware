@@ -356,6 +356,7 @@ static msg_t mavlinkSend(void *arg) {
 	  //The 1Hz messages
 	  if(hbt_cnt > 199)
 	  {
+		  palTogglePad(GPIOC, 1);
 		  send_heart_beat(MAVLINK_COMM_0);
 		  send_status(MAVLINK_COMM_0);
 		  hbt_cnt = 0;
