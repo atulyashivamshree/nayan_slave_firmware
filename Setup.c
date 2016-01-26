@@ -419,7 +419,7 @@ void start_blink(void){
 /**
  * @Warning DO NOT EDIT THIS FUNCTION!
  */
-static WORKING_AREA(blinkerThread, 128);
+static WORKING_AREA(blinkerThread, 4096);
 static msg_t blinker(void *arg) {
 
   (void)arg;
@@ -427,6 +427,7 @@ static msg_t blinker(void *arg) {
 
   while (TRUE) {
 	  palTogglePad(GPIOC, 0);
+	  debug("blinker_thread");
 	  delay(125);
   }
   return 0;
