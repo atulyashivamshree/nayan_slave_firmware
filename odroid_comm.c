@@ -234,7 +234,7 @@ static msg_t mavlinkSend(void *arg) {
 
   while (TRUE) {
 
-	  if(hbt_cnt > 200){
+	  if(hbt_cnt > 100){
 		  palTogglePad(GPIOC, 1);
 		  debug("Odroid alive");
 		  send_heart_beat();
@@ -257,22 +257,24 @@ static msg_t mavlinkSend(void *arg) {
 	  }
 
 
-	  if(imu_cnt > 3)
+	  if(imu_cnt > 1)
 	  {
 		  send_scaled_imu();
 		  send_attitude();
+		  send_sim_state();
+		  send_hil_state();
 		  imu_cnt = 0;
 	  }
 
 //	  if(sim_state_cnt > 3)				//TODO change the sending rates after the debugging stage
 //	  {
-		  send_sim_state();
+
 //		  sim_state_cnt = 0;
 //	  }
 
 //	  if(hil_cnt > 3)
 //	  {
-		  send_hil_state();
+
 //		  hil_cnt = 0;
 //	  }
 		  gps_cnt++;
@@ -294,7 +296,7 @@ static msg_t mavlinkSend(void *arg) {
 	  gps_cnt++;
 #endif
 
-	  chThdSleep(US2ST(4500));
+	  chThdSleep(US2ST(9500));
 	  hbt_cnt++;
 
   }
