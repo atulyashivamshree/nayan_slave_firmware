@@ -5,7 +5,6 @@
  *      Author: atulya
  */
 
-
 #include "main.h"
 
 /**
@@ -27,13 +26,13 @@ int isIMUGlitching(void)
 	int all_ok = 1;
 
 	//assuming that a sane accelerometer reading + g  is at least 1mss
-	if(normVec3f(sens_imu.accel_calib) < MIN_ACCEL_MEASURED)
+	if(normVec3f(sens_imu.accel) < MIN_ACCEL_MEASURED)
 		all_ok = 0;
 
 	Vector3f accel_diff;
-	accel_diff.x = sens_imu.accel_calib.x - inav.last_good_imu.x;
-	accel_diff.y = sens_imu.accel_calib.y - inav.last_good_imu.y;
-	accel_diff.z = sens_imu.accel_calib.z - inav.last_good_imu.z;
+	accel_diff.x = sens_imu.accel.x - inav.last_good_imu.x;
+	accel_diff.y = sens_imu.accel.y - inav.last_good_imu.y;
+	accel_diff.z = sens_imu.accel.z - inav.last_good_imu.z;
 	(void)accel_diff;
 //	q[1] = normVec3f(accel_diff);
 
@@ -42,7 +41,7 @@ int isIMUGlitching(void)
 
 	if(all_ok == 1 )
 	{
-		inav.last_good_imu = sens_imu.accel_calib;
+		inav.last_good_imu = sens_imu.accel;
 		inav.last_good_imu_update = sens_imu.stamp;
 	}
 	else
@@ -75,17 +74,17 @@ void updateAHRS(void)
 	ahrs.sin_psi = sinf(ahrs.attitude.z);
 
 	//DONEtodo- check out this formula from ArduCopter : present in AP_AHRS_DCM and AP_MATH/matrix3
-	ahrs.accel_ef.x = ahrs.cos_theta*ahrs.cos_psi*sens_imu.accel_calib.x +
-					(-ahrs.cos_phi*ahrs.sin_psi + ahrs.sin_phi*ahrs.sin_theta*ahrs.cos_psi)*sens_imu.accel_calib.y +
-					(ahrs.sin_phi*ahrs.sin_psi + ahrs.cos_phi*ahrs.sin_theta*ahrs.cos_psi)*sens_imu.accel_calib.z;
+	ahrs.accel_ef.x = ahrs.cos_theta*ahrs.cos_psi*sens_imu.accel.x +
+					(-ahrs.cos_phi*ahrs.sin_psi + ahrs.sin_phi*ahrs.sin_theta*ahrs.cos_psi)*sens_imu.accel.y +
+					(ahrs.sin_phi*ahrs.sin_psi + ahrs.cos_phi*ahrs.sin_theta*ahrs.cos_psi)*sens_imu.accel.z;
 
-	ahrs.accel_ef.y = ahrs.cos_theta*ahrs.sin_psi*sens_imu.accel_calib.x +
-					(ahrs.cos_phi*ahrs.cos_psi + ahrs.sin_phi*ahrs.sin_theta*ahrs.sin_psi)*sens_imu.accel_calib.y +
-					(-ahrs.sin_phi*ahrs.cos_psi + ahrs.cos_phi*ahrs.sin_theta*ahrs.sin_psi)*sens_imu.accel_calib.z;
+	ahrs.accel_ef.y = ahrs.cos_theta*ahrs.sin_psi*sens_imu.accel.x +
+					(ahrs.cos_phi*ahrs.cos_psi + ahrs.sin_phi*ahrs.sin_theta*ahrs.sin_psi)*sens_imu.accel.y +
+					(-ahrs.sin_phi*ahrs.cos_psi + ahrs.cos_phi*ahrs.sin_theta*ahrs.sin_psi)*sens_imu.accel.z;
 
-	ahrs.accel_ef.z = -ahrs.sin_theta*sens_imu.accel_calib.x +
-					ahrs.sin_phi*ahrs.cos_theta*sens_imu.accel_calib.y +
-					ahrs.cos_phi*ahrs.cos_theta*sens_imu.accel_calib.z;
+	ahrs.accel_ef.z = -ahrs.sin_theta*sens_imu.accel.x +
+					ahrs.sin_phi*ahrs.cos_theta*sens_imu.accel.y +
+					ahrs.cos_phi*ahrs.cos_theta*sens_imu.accel.z;
 
 }
 
@@ -525,7 +524,7 @@ static int isSonarGlitching(void)
 {
 	// calculate time since last sane gps reading in ms
 	float sane_dt = (sens_sonar.stamp - inav.last_good_sonar_update) / 1000.0f;
-	(void)sane_dt;													//TODO some unused variable warning has been suppressed using (void)
+	(void)sane_dt;													//TODO some unused variable warning have been suppressed using (void)
 																	//Decide whether to use them or not
 
 	float distance_cm = sens_sonar.depth - inav.last_good_sonar;
@@ -755,7 +754,7 @@ void initINAV()
 	inav.gps_last_update = 0;
 
 	//initialize IMU
-	inav.last_good_imu = sens_imu.accel_calib;
+	inav.last_good_imu = sens_imu.accel;
 
 #if(USE_GPS_NOT_CV == 1)
 	initializeGPSHome();
@@ -794,7 +793,7 @@ void resetINAV()
 #endif
 
 	//initialize IMU
-	inav.last_good_imu = sens_imu.accel_calib;
+	inav.last_good_imu = sens_imu.accel;
 
 	inav.sonar_last = 0;
 	inav.sonar_last_update = 0;
@@ -937,141 +936,4 @@ void updateINAV(uint32_t del_t)
 //		printQueue(inav.historic_x, inav.historic_x_property);
 		pushToQueue(inav.position_base.y, inav.historic_y, &inav.historic_y_property);
 	}
-}
-
-void initSystemState(void)
-{
-	sys_state.onboard_control_sensors_present = MAV_SYS_STATUS_SENSOR_3D_GYRO | MAV_SYS_STATUS_SENSOR_3D_ACCEL |
-			MAV_SYS_STATUS_SENSOR_DIFFERENTIAL_PRESSURE | MAV_SYS_STATUS_SENSOR_GPS |
-			MAV_SYS_STATUS_SENSOR_LASER_POSITION | MAV_SYS_STATUS_SENSOR_VISION_POSITION |
-			MAV_SYS_STATUS_SENSOR_XY_POSITION_CONTROL | MAV_SYS_STATUS_SENSOR_Z_ALTITUDE_CONTROL |
-			MAV_SYS_STATUS_SENSOR_RC_RECEIVER |
-			MAV_SYS_STATUS_AHRS;
-
-	sys_state.onboard_control_sensors_enabled = MAV_SYS_STATUS_SENSOR_3D_GYRO | MAV_SYS_STATUS_SENSOR_3D_ACCEL |
-			MAV_SYS_STATUS_SENSOR_XY_POSITION_CONTROL | MAV_SYS_STATUS_SENSOR_Z_ALTITUDE_CONTROL |
-			MAV_SYS_STATUS_SENSOR_RC_RECEIVER |
-			MAV_SYS_STATUS_AHRS;
-
-	if(USE_BARO_NOT_SONAR == 1)
-		sys_state.onboard_control_sensors_enabled = sys_state.onboard_control_sensors_enabled | MAV_SYS_STATUS_SENSOR_DIFFERENTIAL_PRESSURE;
-	else
-		sys_state.onboard_control_sensors_enabled = sys_state.onboard_control_sensors_enabled | MAV_SYS_STATUS_SENSOR_LASER_POSITION;
-
-	if(USE_GPS_NOT_CV == 1)
-		sys_state.onboard_control_sensors_enabled = sys_state.onboard_control_sensors_enabled | MAV_SYS_STATUS_SENSOR_GPS;
-	else
-		sys_state.onboard_control_sensors_enabled = sys_state.onboard_control_sensors_enabled | MAV_SYS_STATUS_SENSOR_VISION_POSITION;
-
-	sys_state.onboard_control_sensors_health = MAV_SYS_STATUS_SENSOR_3D_GYRO | MAV_SYS_STATUS_SENSOR_3D_ACCEL |
-			MAV_SYS_STATUS_SENSOR_RC_RECEIVER |
-			MAV_SYS_STATUS_AHRS;
-	sys_state.base_mode = MAV_MODE_GUIDED_DISARMED;
-	sys_state.system_status = MAV_STATE_UNINIT;
-
-	initializeLPF(&sys_state.channel7_filter, STICK_MIN, 0.8);
-
-	strncpy(debug_vec.name, "uninit", 10);
-	debug_vec.vector.x = 1.2;
-	debug_vec.vector.y = -0.5;
-	debug_vec.vector.z = 3.1;
-}
-
-void updateSystemState(void)
-{
-	uint32_t now = millis();
-
-	Vector2f velxy;
-	velxy = (Vector2f){inav.velocity.x, inav.velocity.y};
-
-	//update the state for control
-#if (USE_GPS_NOT_CV == 1)
-	sys_state.onboard_control_sensors_health |= MAV_SYS_STATUS_SENSOR_XY_POSITION_CONTROL;
-#else
-	if(pos_control._flags.xy_control_to_pilot)
-		sys_state.onboard_control_sensors_health |= MAV_SYS_STATUS_SENSOR_XY_POSITION_CONTROL;
-	else
-		sys_state.onboard_control_sensors_health &= ~MAV_SYS_STATUS_SENSOR_XY_POSITION_CONTROL;
-#endif
-
-#if (USE_BARO_NOT_SONAR == 1)
-	sys_state.onboard_control_sensors_health |= MAV_SYS_STATUS_SENSOR_Z_ALTITUDE_CONTROL;
-#else
-	sys_state.onboard_control_sensors_health |= MAV_SYS_STATUS_SENSOR_Z_ALTITUDE_CONTROL;
-
-#endif
-
-	//vfr_hud
-	sys_state.ground_speed = normVec2f(velxy)/100.0f;
-	sys_state.heading = (int16_t)(ahrs.attitude.z*RAD_TO_DEG);
-	sys_state.throttle = (uint16_t)(pos_control.throttle_out - THROTTLE_MIN)/(THROTTLE_MAX - THROTTLE_MIN);
-
-	//nav_controller_output
-	sys_state.nav_bearing = (int16_t)(wp_nav.waypoint_yaw*RAD_TO_DEG);
-	sys_state.target_bearing = 0.0f;
-	Vector2f dist_error;
-	dist_error = (Vector2f){pos_control.pos_target.x - inav.position.x, pos_control.pos_target.y - inav.position.y};
-	sys_state.wp_dist = 0.0f;
-	sys_state.alt_error = (pos_control.pos_target.z - inav.position.z)/100.0f;
-	sys_state.xtrack_error = normVec2f(dist_error)/100.0f;
-	sys_state.aspeed_error = 0.0f;
-
-	//if AHRS has timed out update the status for it
-	if((now - ahrs.stamp) > AP_INTERTIALNAV_GPS_TIMEOUT_MS)
-		sys_state.onboard_control_sensors_health &= (~MAV_SYS_STATUS_AHRS);
-	else
-		sys_state.onboard_control_sensors_health |= MAV_SYS_STATUS_AHRS;
-
-}
-
-inline void checkArmingStatus(float dt)
-{
-	//CONDITION FOR MOTORS BEING ARMED(Note that these values may need to recalibrated in case remote is changed)
-	if(rc_in[2] < (STICK_MIN + 80) && rc_in[3] > (STICK_MAX - 80)) {
-		if(sys_state.arming_count < ARMING_TIME)			//pressed continuously for 1 sec @100Hz
-			sys_state.arming_count += dt;
-	}
-	else {
-		if(sys_state.arming_count > 0.0f)
-			sys_state.arming_count -= dt;
-	}
-
-	//================check for disarming================
-	if(rc_in[2] < (STICK_MIN + 80) && rc_in[3] < (STICK_MIN + 80)) {
-		if(sys_state.disarming_count < ARMING_TIME)			//pressed continuously for 1 sec @100Hz
-			sys_state.disarming_count += dt;
-	}
-	else {
-		if(sys_state.disarming_count > 0.0f)
-			sys_state.disarming_count -= dt;
-	}
-
-	//====assign flags based on the current status of the code=========
-	if(sys_state.flag_armed == 0 && sys_state.arming_count >= ARMING_TIME)
-	{
-		sys_state.flag_armed = 1;
-		sys_state.flag_arming = 1;
-		sys_state.base_mode = MAV_MODE_GUIDED_ARMED;
-
-	}
-	else
-		sys_state.flag_arming = 0;
-
-	if(sys_state.flag_armed == 1 && sys_state.disarming_count >= ARMING_TIME)
-	{
-		sys_state.flag_armed = 0;
-		sys_state.base_mode = MAV_MODE_GUIDED_DISARMED;
-
-	}
-}
-
-inline bool_t isSlaveActive(void)
-{
-	float chnl7_out = applyLPF(&sys_state.channel7_filter, rc_in[6], 0.01);
-	debug_vec.vector.x = chnl7_out;
-	//(Note that these values may need to recalibrated in case remote is changed)
-	if(chnl7_out > (2000 + 917)/2)
-		return TRUE;
-	else
-		return FALSE;
 }

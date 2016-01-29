@@ -4,7 +4,7 @@
  *  Created on: 02-Oct-2015
  *      Author: atulya
  */
-#include "main.h"
+#include "arducopter.h"
 
 void initializeVector3fToZero(Vector3f *vec)
 {

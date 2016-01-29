@@ -6,29 +6,50 @@
 #include "main.h"
 #include "Setup.h"
 #include "intercomm.h"
-#include "odroid_comm.h"
+#include "OBC_comm.h"
 
-/**
- * This variable contains velocity in centimeter per second
- */
-Vector3f velocity;
-
-/**
- * This variable contains radio control input values.
- */
-uint16_t rc_in[7];
-
+//Handles imu data
 Sensor_IMU sens_imu;
+
+//Handles position data from GPS and Baro
 Sensor_GPS sens_gps;
+
+//Handles altitude estimate from baro
 Sensor_Depth sens_baro;
-Sensor_ExtPos sens_cv;
+
+//Handles depth estimate from sonar
 Sensor_Depth sens_sonar;
 
-AHRS ahrs;
-Inertial_nav_data inav;
-Position_Controller pos_control;
-WP_Nav wp_nav;
-SystemState sys_state;
+//Handles position data from OBC. This is being updated at handleMessage()
+//function in OBC.c
+Sensor_ExtPos sens_cv;
+
+//Handles radio control inputs
+uint16_t rc_in[7];
+
+//If TRUE -> control_command control motors directly (This will bypass Master Controller) (Use Very Cautiously)
+//if FALSE-> control_command are setpoints for attitude controller running on Master Processor
+bool_t dmc = FALSE;
+
+/**
+ * This array is passed to Master controller for Motor Control.
+ * Update these variables with desired value as Output of your control Algorithm
+ *
+ * If dmc = TRUE,
+ * control_command[0] -> Motor 1
+ * control_command[1] -> Motor 2
+ * control_command[2] -> Motor 3
+ * control_command[3] -> Motor 4
+ *
+ * If dmc = FALSE,
+ * control_command[0] -> Desired Roll		(Range: 1000 to 2000)(Scaling -30deg to +30deg)
+ * control_command[1] -> Desired Pitch		(Range: 1000 to 2000)(Scaling -30deg to +30deg)
+ * control_command[2] -> Desired Throttle
+ * control_command[3] -> Desired Yaw		(Range: 1000 to 2000)(Scaling -90deg/sec to +90deg/sec)
+ *
+ */
+uint16_t control_command[4] = {1500, 1500, 1000, 1500};
+
 DebugVec debug_vec;
 
 int main(void)
@@ -40,64 +61,20 @@ int main(void)
 
 	delay(1000);
 
-	odroid_comm_init();
+	OBC_comm_init();
 
-	// initialize states for controller
-	initSystemState();
-	initializePosController();
-	resetController();
-	initializeWPNav();
-	initINAV();
-	sys_state.system_status = MAV_STATE_STANDBY;
+	init_arducopter();
 
 	while(TRUE)
 	{
-		//start time of loop in 10us
-		uint32_t start = chTimeNow();
 
-		//check whether new data has arrived on imu
-		if(sens_imu.stamp > inav.last_imu_stamp)
-		{
-			if(isIMUGlitching() == 0)
-			{
-				updateAHRS();
-				updateINAV(sens_imu.stamp - inav.last_imu_stamp);
-			}
-			else
-			{
-				delay(10);
-				continue;
-			}
-		}
+		/**
+		 * User code goes here. This loop will be executed at 100Hz
+		 */
 
-		//CONDITION FOR RUNNING LOITER to be run only when the switch is pressed on for the HLP code
-		if(isSlaveActive() == TRUE)
-		{
-			loiter_run();
-			sys_state.system_status = MAV_STATE_ACTIVE;
-		}
-		else
-		{
-			sys_state.system_status = MAV_STATE_STANDBY;
-			resetWaypoint();
-			resetController();
-		}
+		uint32_t t_now = millis();
 
-		checkArmingStatus(0.01f);
-		if(sys_state.flag_arming == 1)
-		{
-			//wait for 1 second. Assuming data LLP reset for BARO is over within a second
-			delay(1000);
-			resetINAV();						//need to reset the baro when arming
-		}
-
-		//calculate system load upto now
-		uint32_t stop = chTimeNow();									//stop time in 10us(10 of microseconds)
-		float duration = (stop-start)/0.1f;								//duration is in us
-		sys_state.system_load = (uint16_t)(duration/10000.0*1000);		//load of the main code 0%:0 100%: 1000 (1 cycle is taken as 10ms)
-
-		//update system state variables
-		updateSystemState();
+		run_arducopter(t_now);
 
 		delay(10);
 

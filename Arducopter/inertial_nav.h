@@ -12,7 +12,7 @@
  * @brief This file implements the basic inertial navigation system using a complementary filter
  */
 
-#include "main.h"
+#include "stdbool.h"
 #include "config.h"
 
 #ifndef INERTIAL_NAV_H_
@@ -48,7 +48,7 @@
 
 #if (USE_BARO_NOT_SONAR == 1)
 	#define AP_HISTORIC_Z_SIZE						COUNT_Z_DELAY_BARO
-	#define AP_INTERTIALNAV_TC_Z    				2.5f // default time constant for complementary filter's Z axis
+	#define AP_INTERTIALNAV_TC_Z    				1.5f // default time constant for complementary filter's Z axis
 	#define POSTARGET_MAX_ALTITUDE					1000
 	#define POSTARGET_MIN_ALTITUDE					-1000
 #else
@@ -176,13 +176,5 @@ void updateINAVGains(void);
 void setPositionXY(float x, float y);
 
 int isIMUGlitching(void);
-
-void initSystemState(void);
-
-void updateSystemState(void);
-
-void checkArmingStatus(float dt);
-
-bool_t isSlaveActive(void);
 
 #endif /* INERTIAL_NAV_H_ */

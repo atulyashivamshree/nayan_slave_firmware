@@ -647,21 +647,21 @@
 
 // Velocity (vertical) control gains
 #ifndef VEL_Z_P
- # define VEL_Z_P       5.0f
+ # define VEL_Z_P       7.5f
 #endif
 
 // Accel (vertical) control gains
 #ifndef ACCEL_Z_P
- # define ACCEL_Z_P     0.50f
+ # define ACCEL_Z_P     0.75f
 #endif
 #ifndef ACCEL_Z_I
- # define ACCEL_Z_I     1.00f
+ # define ACCEL_Z_I     1.50f
 #endif
 #ifndef ACCEL_Z_D
  # define ACCEL_Z_D     0.0f
 #endif
 #ifndef ACCEL_Z_IMAX
- # define ACCEL_Z_IMAX  200			//IGNORE changed by atulya
+ # define ACCEL_Z_IMAX  400			//IGNORE changed by atulya
 #endif
 #ifndef ACCEL_Z_FILT_HZ
  # define ACCEL_Z_FILT_HZ   20.0f

@@ -4,7 +4,7 @@
  *  Created on: 05-Oct-2015
  *      Author: atulya
  */
-#include "main.h"
+#include "../main.h"
 
 void initializePosController()
 {
@@ -50,10 +50,10 @@ void initializePosController()
 	pos_control.roll_out = STICK_MID;
 	pos_control.yaw_rate_out = STICK_MID;
 
-	ic_rc_or_data.ic_rc.rc1 = pos_control.roll_out;
-	ic_rc_or_data.ic_rc.rc2 = pos_control.pitch_out;
-	ic_rc_or_data.ic_rc.rc3 = pos_control.throttle_out;
-	ic_rc_or_data.ic_rc.rc4 = pos_control.yaw_rate_out;
+	control_command[0] = pos_control.roll_out;
+	control_command[1] = pos_control.pitch_out;
+	control_command[2] = pos_control.throttle_out;
+	control_command[3] = pos_control.yaw_rate_out;
 
 	pos_control.alt_max = POSTARGET_MAX_ALTITUDE;
 	pos_control.alt_min = POSTARGET_MIN_ALTITUDE;
@@ -105,10 +105,10 @@ void resetController()
 	pos_control.roll_out = STICK_MID;
 	pos_control.yaw_rate_out = STICK_MID;
 
-	ic_rc_or_data.ic_rc.rc1 = pos_control.roll_out;
-	ic_rc_or_data.ic_rc.rc2 = pos_control.pitch_out;
-	ic_rc_or_data.ic_rc.rc3 = pos_control.throttle_out;
-	ic_rc_or_data.ic_rc.rc4 = pos_control.yaw_rate_out;
+	control_command[0] = pos_control.roll_out;
+	control_command[1] = pos_control.pitch_out;
+	control_command[2] = pos_control.throttle_out;
+	control_command[3] = pos_control.yaw_rate_out;
 
 	resetLPF(&pos_control.throttle_in_filter, pos_control.throttle_out);
 	pos_control._flags.reset_accel_to_lean_xy = 1;
@@ -660,16 +660,16 @@ void setAttitude(float roll, float pitch, float yaw_rate)
 	pos_control.pitch_out = constrain_int(pitch_out, RP_OUTPUT_MIN, RP_OUTPUT_MAX);
 	pos_control.yaw_rate_out = constrain_int(yaw_rate_out, YAW_OUTPUT_MIN, YAW_OUTPUT_MAX);
 
-	ic_rc_or_data.ic_rc.rc1 = pos_control.roll_out;
-	ic_rc_or_data.ic_rc.rc2 = pos_control.pitch_out;
-	ic_rc_or_data.ic_rc.rc4 = pos_control.yaw_rate_out;
+	control_command[0] = pos_control.roll_out;
+	control_command[1] = pos_control.pitch_out;
+	control_command[3] = pos_control.yaw_rate_out;
 
 #if(USE_GPS_NOT_CV == 0)
 	pos_control._flags.xy_control_to_pilot = 1 - sens_cv.flag_active;
 	if(pos_control._flags.xy_control_to_pilot)
 	{
-		ic_rc_or_data.ic_rc.rc1 = rc_in[0];
-		ic_rc_or_data.ic_rc.rc2 = rc_in[1];
+		control_command[0] = rc_in[0];
+		control_command[1] = rc_in[1];
 	}
 	else
 	{
@@ -678,9 +678,9 @@ void setAttitude(float roll, float pitch, float yaw_rate)
 #endif
 
 	//USE THIS IF YOU WANT TO DIRECTLY MAP RC INPUTS TO OVERRIDES
-//	ic_rc_or_data.ic_rc.rc1 = rc_in[0];
-//	ic_rc_or_data.ic_rc.rc2 = rc_in[1];
-//	ic_rc_or_data.ic_rc.rc4 = rc_in[3];
+//	control_command[0] = rc_in[0];
+//	control_command[1] = rc_in[1];
+//	control_command[3] = rc_in[3];
 }
 
 void setThrottleOut(float throttle_in, uint8_t apply_angle_boost, float filt_hz)
@@ -695,15 +695,16 @@ void setThrottleOut(float throttle_in, uint8_t apply_angle_boost, float filt_hz)
 
 	if(apply_angle_boost == 1)
 	{
-		throttle_out = (throttle_in - (THROTTLE_MIN+130))*boost_factor + (THROTTLE_MIN+130);		//throttle min was 130/1000 from nayan llp parameters
+//		throttle_out = (throttle_in - (THROTTLE_MIN+130-200))*boost_factor + (THROTTLE_MIN+130-200);		//throttle min was 130/1000 from nayan llp parameters
+		throttle_out = (throttle_in - (THROTTLE_MIN+130))*boost_factor + (THROTTLE_MIN+130);
 	}
 	else
 		throttle_out = throttle_in;
 
 	pos_control.throttle_out = constrain_int(throttle_out, THROTTLE_OUTPUT_MIN, THROTTLE_OUTPUT_MAX);
-	ic_rc_or_data.ic_rc.rc3 = pos_control.throttle_out;
+	control_command[2] = pos_control.throttle_out;
 //	debug("sending out throttle %d", pos_control.throttle_out);
 
 	//USE THIS IF YOU WANT TO DIRECTLY MAP RC INPUTS TO OVERRIDES
-//	ic_rc_or_data.ic_rc.rc3 = rc_in[2];
+//	control_command[2] = rc_in[2];
 }

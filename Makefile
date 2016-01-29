@@ -95,13 +95,14 @@ CSRC = $(PORTSRC) \
        $(CHIBIOS)/os/various/memstreams.c \
        stubs.c \
        Setup.c \
-       params.c \
+       Arducopter/params.c \
        intercomm.c \
-       odroid_comm.c \
-       inertial_nav.c \
-       autopilot_math.c \
-       position_controller.c\
-       wp_nav.c\
+       OBC_comm.c \
+       Arducopter/inertial_nav.c \
+       Arducopter/autopilot_math.c \
+       Arducopter/position_controller.c\
+       Arducopter/wp_nav.c\
+       Arducopter/arducopter.c\
        main.c
        
 # C++ sources that can be compiled in ARM or THUMB mode depending on the global

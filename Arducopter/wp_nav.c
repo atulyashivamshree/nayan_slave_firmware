@@ -5,7 +5,7 @@
  *      Author: atulya
  */
 
-#include "main.h"
+#include "../main.h"
 
 void initializeWPNav()
 {
@@ -60,9 +60,8 @@ void initializeWPNav()
 
 }
 
-void loiter_run()
+void loiter_run(uint32_t now)
 {
-	uint32_t now = millis();
 	float dt = now - wp_nav._last_pilot_update_ms;
 
 	// run at pilot_input update rate.
@@ -111,7 +110,7 @@ void loiter_run()
 	}
 
 	// XY and yaw control
-	updateLoiter();
+	updateLoiter(now);
 	setAttitude(pos_control.roll_target, pos_control.pitch_target, wp_nav._pilot_desired_yaw_rate);
 
 	// Alt hold control code
@@ -400,10 +399,10 @@ static void calcLoiterDesiredVelocity(float nav_dt)
 
 }
 
-void updateLoiter()
+void updateLoiter(uint32_t t_now)
 {
 	// calculate dt
-	float dt = (millis() - pos_control.last_update_xy_ms)*0.001f;
+	float dt = (t_now - pos_control.last_update_xy_ms)*0.001f;
 
 	// run at poscontrol update rate.
 	if (dt >= pos_control.dt_xy)

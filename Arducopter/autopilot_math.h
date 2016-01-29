@@ -7,6 +7,7 @@
 
 #include "math.h"
 #include "stdlib.h"
+#include "stdint.h"
 
 #ifndef AUTOPILOT_MATH_H_
 #define AUTOPILOT_MATH_H_

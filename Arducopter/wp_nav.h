@@ -5,7 +5,7 @@
  *      Author: atulya
  */
 
-#include "main.h"
+#include "stdint.h"
 
 #ifndef WP_NAV_H_
 #define WP_NAV_H_
@@ -139,7 +139,7 @@ typedef struct ap_waypoint_nav
     float       _yaw;                   // heading according to yaw
 }WP_Nav;
 
-void updateLoiter(void);
+void updateLoiter(uint32_t t_now);
 
 void updateWaypoint(void);
 void resetWaypoint(void);
@@ -147,7 +147,7 @@ void resetWaypoint(void);
 void initializeWPNav(void);
 void checkSticksForAutoWPNav(void);
 
-void loiter_run(void);
+void loiter_run(uint32_t t_now);
 
 void getNavDesiredVelocity(Vector2f pilot_desired_vel);
 void getPilotDesiredXYVelocity(void);
