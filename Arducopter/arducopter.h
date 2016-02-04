@@ -74,6 +74,8 @@ extern Position_Controller pos_control;
 extern WP_Nav wp_nav;
 extern SystemState sys_state;
 
+extern Vector3f debug_vec2;
+
 /*
  * @brief initializes the main functions of arducopter based loiter code
  */

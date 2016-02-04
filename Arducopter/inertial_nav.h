@@ -29,7 +29,7 @@
 #define AP_INTERTIALNAV_GPS_TIMEOUT_MS              300     // timeout after which position error from GPS will fall to zero
 
 #define COUNT_Z_DELAY_BARO							2
-#define COUNT_Z_DELAY_SONAR							20
+#define COUNT_Z_DELAY_SONAR							25
 		// assuming a 150 ms delay for the baro data if the AHRS is called at 100Hz
 #define GPS_RADIUS_CM								400
 #define BARO_RADIUS_CM								250

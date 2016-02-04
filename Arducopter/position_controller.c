@@ -312,6 +312,9 @@ static void rateToAccelXY(float dt)
         vel_xy_i = getPI_I_shrink(&pos_control._pi_vel_xy);
     }
 
+    debug_vec.vector.x = vel_xy_i.x;
+    debug_vec.vector.y = vel_xy_i.y;
+
     // combine feed forward accel with PID output from velocity error and scale PID output to compensate for optical flow measurement induced EKF noise
     pos_control.accel_target.x = pos_control.accel_feedforward.x + (vel_xy_p.x + vel_xy_i.x) * 1.0;
     pos_control.accel_target.y = pos_control.accel_feedforward.y + (vel_xy_p.y + vel_xy_i.y) * 1.0;

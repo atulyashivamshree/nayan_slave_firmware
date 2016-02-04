@@ -13,6 +13,8 @@ Position_Controller pos_control;
 WP_Nav wp_nav;
 SystemState sys_state;
 
+Vector3f debug_vec2;
+
 void init_arducopter()
 {
 	// initialize states for controller
@@ -61,7 +63,7 @@ void run_arducopter(uint32_t t_now)
 	if(sys_state.flag_arming == 1)
 	{
 		//wait for 1 second. Assuming data LLP reset for BARO is over within a second
-//		delay(1000);//TODO
+		delay(1000);
 		resetINAV();						//need to reset the baro when arming
 	}
 
@@ -204,7 +206,7 @@ inline void checkArmingStatus(float dt)
 inline uint8_t isSlaveActive(void)
 {
 	float chnl7_out = applyLPF(&sys_state.channel7_filter, rc_in[6], 0.01);
-	debug_vec.vector.x = chnl7_out;
+
 	//(Note that these values may need to recalibrated in case remote is changed)
 	if(chnl7_out > (2157 + 917)/2)
 		return 1;
