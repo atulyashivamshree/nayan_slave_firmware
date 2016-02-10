@@ -686,11 +686,10 @@ void setAttitude(float roll, float pitch, float yaw_rate)
 //	control_command[3] = rc_in[3];
 }
 
-void setThrottleOut(float throttle_in, uint8_t apply_angle_boost, float filt_hz)
+void setThrottleOut(float throttle_in, uint8_t apply_angle_boost)
 {
 	float throttle_out;
 	//TODO check filt_hz and angle_boost
-	pos_control.throttle_in_filter.cutoff_freq = filt_hz;
 	throttle_in = applyLPF(&pos_control.throttle_in_filter, throttle_in, POSCONTROL_DT_100HZ);
 
 	float cos_tilt = ahrs.cos_theta * ahrs.cos_phi;

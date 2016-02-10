@@ -5,12 +5,20 @@
  *      Author: atulya
  */
 
+/**
+ * @date 02-Oct-2015
+ * @author Atulya Shivam Shree
+ * @file autopilot_math.h
+ * @brief Implements the basic math functions used for developing inertial
+ * navigation and a position controller
+ */
+
 #include "math.h"
 #include "stdlib.h"
 #include "stdint.h"
 
-#ifndef AUTOPILOT_MATH_H_
-#define AUTOPILOT_MATH_H_
+#ifndef ARDUCOPTER_AUTOPILOT_MATH_H_
+#define ARDUCOPTER_AUTOPILOT_MATH_H_
 
 #define M_PI_F 3.141592653589793f
 #define DEG_TO_RAD 0.017453292519943295769236907684886f
@@ -53,64 +61,78 @@ typedef struct
 	uint8_t is_empty;		/**< a flag for storing whether the buffer is empty*/
 }Queue_property;
 
+/**
+ * @brief contains the basic elements for an LPF
+ */
 typedef struct
 {
-	float cutoff_freq;
-	float sampling_freq;
-	float alpha;
+	float cutoff_freq;		/**< cutoff frequency in hz */
+	float sampling_freq;	/**< sampling frequency in hz */
+	float alpha;			/**< an intermediary value for computation*/
 
-	float output;				//system state on which lpf is applied
+	float output;			/**< system state on which lpf is applied */
 }LowPassFilter;
 
-#define AC_PI_2D_FILT_HZ_DEFAULT  20.0f   // default input filter frequency
-#define AC_PID_FILT_HZ_DEFAULT  20.0f   // default input filter frequency
-
+/**
+ * @brief a structure for holding states of a P controller
+ */
 typedef struct
 {
 	float kP;
 }Controller_P;
 
+/**
+ * @brief structure for holding states of a Vector2f PI controller
+ */
 typedef struct
 {
-	float kP;
-	float kI;
-	float Imax;
-	float filt_hz;
-	uint8_t reset_filter;
+	float kP;					/**< Gain kp*/
+	float kI;					/**< Gain kI*/
+	float Imax;					/**< Maximum value integrator can take */
+	float filt_hz;				/**< cutoff frequency for filter on input */
+	uint8_t reset_filter;		/**< a flag to indicate that filter is to be reset*/
 
-	float dt;
-	Vector2f input;
-	Vector2f integrator;
-	float filt_alpha;
-	Vector2f result;
+	float dt;					/**< sampling time of the controller*/
+	Vector2f input;				/**< input in the form of a 2D vector*/
+	Vector2f integrator;		/**< storing the value of integrator*/
+	float filt_alpha;			/**< a constant term used in LPF*/
+
 }Controller_PI_2D;
 
+/**
+ * @brief structure for holding states of a Vector3f PID controller
+ */
 typedef struct
 {
-	float kP;
-	float kI;
-	float kD;
-	float Imax;
-	float filt_hz;
-	uint8_t reset_filter;
+	float kP;					/**< Gain kp*/
+	float kI;					/**< Gain ki*/
+	float kD;					/**< Gain kd*/
+	float Imax;					/**< Max value of integrator*/
+	float filt_hz;				/**< cutoff frequency for filter on input*/
+	uint8_t reset_filter;		/**< flag to be used in case of a reset */
 
-	float dt;
-	float input;
-	float integrator;
-	float derivative;
-	float filt_alpha;
-	float result;
+	float dt;					/**< sampling time of the controller*/
+	float input;				/**< input value*/
+	float integrator;			/**< storing the value of integrator*/
+	float derivative;			/**< storing the value of derivative*/
+	float filt_alpha;			/**< a constant term used in LPF*/
+
 }Controller_PID;
 
 // 2D vector length
 static inline float pythagorous2(float a, float b) {
 	return sqrt(a*a+b*b);
 }
-// a varient of sqrt() that checks the input ranges and ensures a
-// valid value as output. If a negative number is given then 0 is
-// returned. The reasoning is that a negative number for sqrt() in our
-// code is usually caused by small numerical rounding errors, so the
-// real input should have been zero
+/**
+ * @brief returns sqrt of value
+ *
+ * a varient of sqrt() that checks the input ranges and ensures a
+ * valid value as output. If a negative number is given then 0 is
+ * returned. The reasoning is that a negative number for sqrt() in our
+ * code is usually caused by small numerical rounding errors, so the
+ * real input should have been zero
+ */
+
 static inline float safe_sqrt(float v)
 {
     float ret = sqrtf(v);
@@ -120,7 +142,9 @@ static inline float safe_sqrt(float v)
     return ret;
 }
 
-// constrain a value
+/**
+ * @brief constrain a value within bounds
+ */
 static inline float constrain_float(float amt, float low, float high)
 {
 	// the check for NaN as a float prevents propogation of
@@ -133,6 +157,9 @@ static inline float constrain_float(float amt, float low, float high)
 	return ((amt)<(low)?(low):((amt)>(high)?(high):(amt)));
 }
 
+/**
+ * @brief constrain a value within bounds
+ */
 static inline int constrain_int(int amt, int low, int high)
 {
 	// the check for NaN as a float prevents propogation of
@@ -145,18 +172,31 @@ static inline int constrain_int(int amt, int low, int high)
 	return ((amt)<(low)?(low):((amt)>(high)?(high):(amt)));
 }
 
+/**
+ * @brief return the L2 norm of a 3D vector
+ */
 static inline float normVec3f(Vector3f inp)
 {
 	return sqrt(pow(inp.x,2)+ pow(inp.y, 2)+ pow(inp.z, 2));
 }
 
+/**
+ * @brief return the L2 norm of a 2D vector
+ */
 static inline float normVec2f(Vector2f inp)
 {
 	return sqrt(pow(inp.x,2)+ pow(inp.y, 2));
 }
-
+/**
+ * @brief sets a vector to [0, 0, 0]
+ */
 void initializeVector3fToZero(Vector3f* inp);
+
+/**
+ * @brief sets a vector to [0, 0]
+ */
 void initializeVector2fToZero(Vector2f* inp);
+
 /**
  * @brief pops the first element of the queue and returns it
  * @param arr the array storing all the elements of the queue
@@ -213,4 +253,4 @@ float getPID_D(Controller_PID *pid);
 
 //////////////////////////////////////////////////
 
-#endif /* AUTOPILOT_MATH_H_ */
+#endif /* ARDUCOPTER_AUTOPILOT_MATH_H_ */

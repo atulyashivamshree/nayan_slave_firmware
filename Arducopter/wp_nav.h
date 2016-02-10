@@ -1,14 +1,14 @@
-/*
- * wp_nav.h
- *
- *  Created on: 10-Oct-2015
- *      Author: atulya
+/**
+ * @date 10-Oct-2015
+ * @author Atulya Shivam Shree
+ * @file wp_nav.h
+ * @brief Implements waypoint based control code, changes desired position and velocities to
+ * in order to reach a waypoint
  */
-
 #include "stdint.h"
 
-#ifndef WP_NAV_H_
-#define WP_NAV_H_
+#ifndef ARDUCOPTER_WP_NAV_H
+#define ARDUCOPTER_WP_NAV_H
 
 ///--------------CONSTANTS by Atulya-----------
 
@@ -31,8 +31,6 @@
 #define DEGREEPS_TO_STICK						10.0		//TODO correct this and below on the basis of a collection of some data validations
 #define STICK_TO_DEGREEPS						0.1f
 #define PILOT_INPUT_DT_50HZ						0.02f
-#define OMEGA									2.5
-#define TAU										1
 //---------------------------------------------
 
 // loiter maximum velocities and accelerations
@@ -139,22 +137,70 @@ typedef struct ap_waypoint_nav
     float       _yaw;                   // heading according to yaw
 }WP_Nav;
 
+/**
+ * @brief update the loiter code for XY controller
+ * @param t_now time in millis() at the instant this function was called
+ */
 void updateLoiter(uint32_t t_now);
 
+/**
+ * @brief update the waypoint depending on any new input from OBC
+ */
 void updateWaypoint(void);
+
+/**
+ * @brief reset the waypoint to current position when auto WP mode is inactive
+ */
 void resetWaypoint(void);
 
+/**
+ * @brief initialize the waypoint navigation code
+ *
+ * in default condition the point at which Slave code is activated is taken as the target position until
+ * a new one is available
+ */
 void initializeWPNav(void);
+
+/**
+ * @brief checks if all sticks are at mid and if the sticks have been at mid for some time activate the
+ * auto WP mode
+ */
 void checkSticksForAutoWPNav(void);
 
+/**
+ * @brief run the general loiter code for XY and Z navigation
+ */
 void loiter_run(uint32_t t_now);
 
+/**
+ * @brief generate desired velocities using the desired velocities which are available
+ * @param pilot_desired_vel commanded velocity to the system either from pilot or auto WP mode
+ */
 void getNavDesiredVelocity(Vector2f pilot_desired_vel);
+
+/**
+ * @brief translate pilot transmitter stick movement to XY velocity
+ */
 void getPilotDesiredXYVelocity(void);
+
+/**
+ * @brief translate pilot stick movements to XY acceleration
+ */
 void getPilotDesiredAcceleration(void);
+
+/**
+ * @brief translate pilot stick movement to desired yaw_rate
+ */
 void getPilotDesiredYawRate(void);
+
+/**
+ * @brief translate pilot transmitter throttle stick movement to Z velocity
+ */
 void getPilotClimbRate(void);
 
+/**
+ * @brief generate velocities required to reach a given waypoint in auto WP mode
+ */
 void getWPNavDesiredVelocity(void);
 
-#endif /* WP_NAV_H_ */
+#endif /* ARDUCOPTER_WP_NAV_H */

@@ -1,41 +1,41 @@
-/*
- * params.h
- *
- *  Created on: 24-Oct-2015
- *      Author: atulya
+/**
+ * @date 24-Oct-2015
+ * @author Atulya Shivam Shree
+ * @file params.h
+ * @brief Implements the basic parameters required during development of Arducopter based control code
  */
 
 #include "main.h"
 #include "mavlink_types.h"
 
-#ifndef PARAMS_H_
-#define PARAMS_H_
+#ifndef ARDUCOPTER_PARAMS_H
+#define ARDUCOPTER_PARAMS_H
 
 #define SYSID 1
 #define SW_TYPE 10
 #define MY_GCS 255
 
-extern const char sysid_thismav[16];
-extern const char sysid_sw_type[16];
-extern const char sysid_mygcs[16];
+extern const char sysid_thismav[16];		/**< System id of this mav*/
+extern const char sysid_sw_type[16];		/**< System software type (according to mavlink specifications */
+extern const char sysid_mygcs[16];			/**< SysID GCS (look up mavlink specifications */
 
-extern const char inav_tc_xy[16];
-extern const char inav_tc_z[16];
+extern const char inav_tc_xy[16];			/**< time constant for the xy complimentary filter */
+extern const char inav_tc_z[16];			/**< time constant for the z complimentary filter */
 
-extern const char pos_xy_p[16];
-extern const char vel_xy_p[16];
-extern const char vel_xy_i[16];
-extern const char vel_xy_imax[16];
+extern const char pos_xy_p[16];				/**< kP for the xy position P controller */
+extern const char vel_xy_p[16];				/**< kP for the xy velocity PI controller */
+extern const char vel_xy_i[16];				/**< kI for the xy velocity PI controller */
+extern const char vel_xy_imax[16];			/**< Max velocity of I for the PI controller */
 
-extern const char pos_z_p[16];
-extern const char vel_z_p[16];
-extern const char accel_z_p[16];
-extern const char accel_z_i[16];
-extern const char accel_z_d[16];
-extern const char accel_z_imax[16];
-extern const char accel_z_filt_hz[16];
+extern const char pos_z_p[16];				/**< kP for the z position P controller */
+extern const char vel_z_p[16];				/**< kP for the z velocity P controller */
+extern const char accel_z_p[16];			/**< kP for the z acceleration PID controller */
+extern const char accel_z_i[16];			/**< kI for the z acceleration PID controller */
+extern const char accel_z_d[16];			/**< kD for the z acceleration PID controller */
+extern const char accel_z_imax[16];			/**< Imax for the z acceleration PID controller */
+extern const char accel_z_filt_hz[16];		/**< filter cutoff frequency for the z acceleration PID controller */
 
-extern const char throttle_hover[16];
+extern const char throttle_hover[16];		/**< throttle required in ideal conditions for hovering*/
 
 extern const char sysid_thismav_index;
 extern const char sysid_sw_type_index;
@@ -715,4 +715,4 @@ void FWparamQSend(mavlink_channel_t chan){
 //void updatePIDFromEEPROM(void);	TODO FUTURE SCOPE
 //void writeParam(void);		TODO FUTURE SCOPE
 
-#endif /* PARAMS_H_ */
+#endif /* ARDUCOPTER_PARAMS_H */

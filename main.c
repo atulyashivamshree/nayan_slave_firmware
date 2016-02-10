@@ -63,7 +63,7 @@ int main(void)
 
 	OBC_comm_init();
 
-	init_arducopter();
+	initializeArducopter();
 
 	while(TRUE)
 	{
@@ -74,7 +74,7 @@ int main(void)
 
 		uint32_t t_now = millis();
 
-		run_arducopter(t_now);
+		runArducopter(t_now);
 
 		delay(10);
 

@@ -15,10 +15,10 @@ SystemState sys_state;
 
 Vector3f debug_vec2;
 
-void init_arducopter()
+void initializeArducopter()
 {
 	// initialize states for controller
-	initSystemState();
+	initializeSystemState();
 	initializePosController();
 	resetController();
 	initializeWPNav();
@@ -27,7 +27,7 @@ void init_arducopter()
 	dmc = FALSE;
 }
 
-void run_arducopter(uint32_t t_now)
+void runArducopter(uint32_t t_now)
 {
 	//start time of loop in 10us
 	uint32_t start = chTimeNow();
@@ -77,7 +77,7 @@ void run_arducopter(uint32_t t_now)
 
 }
 
-void initSystemState(void)
+void initializeSystemState(void)
 {
 	sys_state.onboard_control_sensors_present = MAV_SYS_STATUS_SENSOR_3D_GYRO | MAV_SYS_STATUS_SENSOR_3D_ACCEL |
 			MAV_SYS_STATUS_SENSOR_DIFFERENTIAL_PRESSURE | MAV_SYS_STATUS_SENSOR_GPS |

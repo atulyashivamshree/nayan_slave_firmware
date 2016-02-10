@@ -1,14 +1,14 @@
-/*
- * position_controller.h
- *
- *  Created on: 05-Oct-2015
- *      Author: atulya
+/**
+ * @date 05-Oct-2015
+ * @author Atulya Shivam Shree
+ * @file position_controller.h
+ * @brief Implements the cascaded Position-P,Velocity-PI XY control and
+ * cascaded Position-P, Velocity-P, Acceleration-PID control for Z
  */
-
 #include "stdint.h"
 
-#ifndef POSITION_CONTROLLER_H_
-#define POSITION_CONTROLLER_H_
+#ifndef ARDUCOPTER_POSITION_CONTROLLER_H
+#define ARDUCOPTER_POSITION_CONTROLLER_H
 
 // position controller default definitions
 #define POSCONTROL_THROTTLE_HOVER               1540.0f  // IGNORE changed default throttle required to maintain hover
@@ -40,8 +40,11 @@
 #define POSCONTROL_ACCEL_FILTER_HZ              2.0f    // low-pass filter on acceleration (unit: hz)
 #define POSCONTROL_JERK_RATIO                   0.5f    // Defines the time it takes to reach the requested acceleration IGNORE changed by atulya
 
+/*************************************************
 ///////////Constants defined by atulya ///////////
-#define MAX_LEAN_ANGLE							15	//in degrees
+ ************************************************/
+
+#define MAX_LEAN_ANGLE							15		//in degrees
 
 #define XY_MODE_POS_ONLY 						0       // position correction only (i.e. no velocity feed-forward)
 #define XY_MODE_POS_LIMITED_AND_VEL_FF			1	    // for loiter - rate-limiting the position correction, velocity feed-forward
@@ -134,18 +137,46 @@ typedef struct
 
 }Position_Controller;
 
+/**
+ * @brief intializes the variables of position controller
+ */
 void initializePosController(void);
 
+/**
+ * @brief resets necessary flag and integrator for the different controllers
+ */
 void resetController(void);
 
+/**
+ * @brief sends a desired value of roll pitch and yaw_rate through motor overrides to LLP
+ * @param roll Value of Roll angle in degrees
+ * @param pitch Value of Pitch angle in degrees
+ * @param yaw_rate Value of desired yaw_rate in degree/s
+ */
 void setAttitude(float roll, float pitch, float yaw_rate);
 
+/**
+ * @brief set target height from the climb rate
+ * @param climb_rate altitude speed as calculated from either remote or auto WP
+ * @param dt sampling time of the controller
+ */
 void setAltTargetfromClimbRate(float climb_rate_cms, float dt);
 
-void setThrottleOut(float throttle_in, uint8_t apply_angle_boost, float filt_hz);
+/**
+ * @brief sends an output throttle value to the Master controller as overrides
+ * @param throttle_in input throttle computed from accel PID
+ * @param apply_angle_boost 1 for applying angle boost 0 otherwise
+ */
+void setThrottleOut(float throttle_in, uint8_t apply_angle_boost);
 
+/**
+ * @brief update the XY position controller
+ */
 void updateXYController(int mode, int use_althold_lean_angle);
 
+/**
+ * @brief update the Z position controller
+ */
 void updateZController(void);
 
-#endif /* POSITION_CONTROLLER_H_ */
+#endif /* ARDUCOPTER_POSITION_CONTROLLER_H */

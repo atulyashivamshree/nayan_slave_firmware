@@ -30,9 +30,9 @@ int isIMUGlitching(void)
 		all_ok = 0;
 
 	Vector3f accel_diff;
-	accel_diff.x = sens_imu.accel.x - inav.last_good_imu.x;
-	accel_diff.y = sens_imu.accel.y - inav.last_good_imu.y;
-	accel_diff.z = sens_imu.accel.z - inav.last_good_imu.z;
+	accel_diff.x = sens_imu.accel.x - inav.last_good_imu_accel.x;
+	accel_diff.y = sens_imu.accel.y - inav.last_good_imu_accel.y;
+	accel_diff.z = sens_imu.accel.z - inav.last_good_imu_accel.z;
 	(void)accel_diff;
 //	q[1] = normVec3f(accel_diff);
 
@@ -41,7 +41,7 @@ int isIMUGlitching(void)
 
 	if(all_ok == 1 )
 	{
-		inav.last_good_imu = sens_imu.accel;
+		inav.last_good_imu_accel = sens_imu.accel;
 		inav.last_good_imu_update = sens_imu.stamp;
 	}
 	else
@@ -392,7 +392,7 @@ static int isBaroGlitching(void)
 	float sane_dt = (sens_baro.stamp - inav.last_good_gps_update) / 1000.0f;
 	(void)sane_dt;
 
-	float distance_cm = sens_baro.depth - inav.last_good_baro.z;
+	float distance_cm = sens_baro.depth - inav.last_good_baro;
 //	debug("distance to last_good_baro is %.2f", distance_cm);
 
 	int all_ok = 1;
@@ -411,12 +411,12 @@ static int isBaroGlitching(void)
 
 	if(all_ok == 1)
 	{
-		inav.last_good_baro.z = sens_baro.depth;
+		inav.last_good_baro = sens_baro.depth;
 		inav.last_good_baro_update = sens_baro.stamp;
 	}
 	else
 	{
-		debug("BARO glitched. previous baro reading is %.2f; Current baro reading is %.2f", inav.last_good_baro.z, sens_baro.depth);
+		debug("BARO glitched. previous baro reading is %.2f; Current baro reading is %.2f", inav.last_good_baro, sens_baro.depth);
 	}
 	return (!all_ok);
 }
@@ -524,8 +524,7 @@ static int isSonarGlitching(void)
 {
 	// calculate time since last sane gps reading in ms
 	float sane_dt = (sens_sonar.stamp - inav.last_good_sonar_update) / 1000.0f;
-	(void)sane_dt;													//TODO some unused variable warning have been suppressed using (void)
-																	//Decide whether to use them or not
+	(void)sane_dt;													//TODO FUTURE SCOPE some unused variable warning have been suppressed using (void)
 
 	float distance_cm = sens_sonar.depth - inav.last_good_sonar;
 //	debug("distance to last_good_lat is %.2f", distance_cm);
@@ -703,15 +702,15 @@ void initializeAlt()
 
 #if (USE_BARO_NOT_SONAR == 1)
 	inav.position_base.z = sens_baro.depth;
-	inav.last_good_baro.z = sens_baro.depth;
+	inav.last_good_baro = sens_baro.depth;
 	inav.last_good_baro_update = sens_baro.stamp;
 	inav.position_correction.z = 0.0f;
 	inav.position.z = sens_baro.depth;				//set initial altitude to whatever value is reached
 	debug("Received Baro data. Altitude is %f", sens_baro.depth);
 #else
 	inav.position_base.z = sens_sonar.depth;
-	inav.last_good_baro.z = sens_sonar.depth;
-	inav.last_good_baro_update = sens_sonar.stamp;
+	inav.last_good_sonar = sens_sonar.depth;
+	inav.last_good_sonar_update = sens_sonar.stamp;
 	inav.position_correction.z = 0.0f;
 	inav.position.z = sens_sonar.depth;				//set initial altitude to whatever value is reached
 	debug("Received SONAR data. Altitude is %f", sens_sonar.depth);
@@ -754,7 +753,7 @@ void initINAV()
 	inav.gps_last_update = 0;
 
 	//initialize IMU
-	inav.last_good_imu = sens_imu.accel;
+	inav.last_good_imu_accel = sens_imu.accel;
 
 #if(USE_GPS_NOT_CV == 1)
 	initializeGPSHome();
@@ -793,7 +792,7 @@ void resetINAV()
 #endif
 
 	//initialize IMU
-	inav.last_good_imu = sens_imu.accel;
+	inav.last_good_imu_accel = sens_imu.accel;
 
 	inav.sonar_last = 0;
 	inav.sonar_last_update = 0;

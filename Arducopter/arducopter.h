@@ -5,8 +5,16 @@
  *      Author: atulya
  */
 
-#ifndef ARDUCOPTER_H_
-#define ARDUCOPTER_H_
+/**
+ * @date 28-Jan-2016
+ * @author Atulya Shivam Shree
+ * @file arducopter.h
+ * @brief Implements arducopter based INS and cascaded PID control
+ */
+
+
+#ifndef ARDUCOPTER_ARDUCOPTER_H
+#define ARDUCOPTER_ARDUCOPTER_H
 
 #include "autopilot_math.h"
 #include "inertial_nav.h"
@@ -14,51 +22,53 @@
 #include "wp_nav.h"
 #include "OS_PORT/ext/mavlink/v1.0/common/mavlink.h"
 
-#define ARMING_TIME 1.5f
+#define ARMING_TIME 1.5f			// time taken during arming of the system
 
 /**
- * @brief stores the current attitude and the trigonometric values for future use
+ * @brief stores the current attitude and trigonometric values for future use
  */
 typedef struct
 {
-	uint32_t stamp;
-	Vector3f attitude;
+	uint32_t stamp; 				/**< current time stamp*/
+	Vector3f attitude;				/**< IMU roll, pitch, yaw */
 
-	int32_t lat_home;
-	int32_t lng_home;
-	float alt_home;
+	int32_t lat_home;				/**< Latitude in deg*1e7 of home*/
+	int32_t lng_home;				/**< Longitude in deg*1e7 of home*/
 
 	float sin_phi, cos_phi;
 	float sin_theta, cos_theta;
 	float sin_psi, cos_psi;
 
 	Vector3f accel_ef;
-}AHRS;
+} AHRS;
 
+/**
+ * @brief stores variables which depict the current system state
+ */
 typedef struct
 {
-	uint32_t stamp;
-	uint8_t base_mode;
-	uint8_t mav_state;
-	uint8_t flag_armed;
-	uint8_t flag_arming;
-	float arming_count;
-	float disarming_count;
-	LowPassFilter channel7_filter;
+	//variables for mavlink_msg_heartbeat #0
+	uint32_t stamp;					/**< current time stamp*/
+	uint8_t base_mode;				/**< base mode for HEARTBEAT>base_mode */
+	uint8_t mav_state;				/**< current mav state forHEARTBEAT */
+	uint8_t system_status;			/**< indicates ACTIVE or STANDBY for mavlink HeartBeat message*/
+	uint8_t flag_armed;				/**< flag to indicate system is armed*/
+	uint8_t flag_arming;			/**< flag to indicate armed is complete */
+	float arming_count;				/**< couting the time during which sticks are held for arming*/
+	float disarming_count;			/**< couting the time during which sticks are held for arming*/
 
-	//system_status
-	uint8_t system_status;
+	//variables for mavlink_msg_sys_status #1
 	uint32_t onboard_control_sensors_present;
 	uint32_t onboard_control_sensors_enabled;
 	uint32_t onboard_control_sensors_health;
 	uint16_t system_load;
 
-	//vfr_hud
+	//variables for mavlink_msg_vfr_hud #74
 	float ground_speed;
 	int16_t heading;
 	uint16_t throttle;
 
-	//nav_controller_output
+	//variables for mavlink_msg_nav_controller_output #62
 	int16_t nav_bearing;
 	int16_t target_bearing;
 	uint16_t wp_dist;
@@ -66,29 +76,78 @@ typedef struct
 	float aspeed_error;
 	float xtrack_error;
 
-}SystemState;
+	LowPassFilter channel7_filter;	/**< an LPF on channel 7 out*/
 
+} SystemState;
+
+/**
+ * @brief struct to hold a debug vector and publishing it
+ */
+typedef struct
+{
+	char name[10];
+	Vector3f vector;
+}DebugVec;
+
+
+/**< data structure storing the ahrs data*/
 extern AHRS ahrs;
-extern Inertial_nav_data inav; /**< data structure storing the inertial navigation crucial data #inav. */
+
+/**< data structure storing the inertial navigation crucial data #inav. */
+extern Inertial_nav_data inav;
+
+/**< data structure storing the variables for position control */
 extern Position_Controller pos_control;
+
+/**< data structure for calling the position controller according to waypoint
+ * following code */
 extern WP_Nav wp_nav;
+
+/**< data structure for holding all debug variables */
 extern SystemState sys_state;
 
+/**< data structure for checking debug values. This variable is published in
+ * the funciton send_sim_state() inside OBC_comm.c */
 extern Vector3f debug_vec2;
 
-/*
+/**< another data structure for relaying debug data via telemetry or OBC */
+extern DebugVec debug_vec;
+
+/**
  * @brief initializes the main functions of arducopter based loiter code
  */
-void init_arducopter(void);
+void initializeArducopter(void);
 
-void run_arducopter(uint32_t t_now);
+/**
+ * @brief call to execute the main logic of controller based on Arducopter
+ * @param t_now current timestamp in milliseconds from FCU clock
+ */
+void runArducopter(uint32_t t_now);
 
-void initSystemState(void);
+/**
+ * @brief initializes all the variables pertaining to current system state
+ */
+void initializeSystemState(void);
 
+/**
+ * @brief updates the variables in the struct SystemState
+ */
 void updateSystemState(void);
 
+/**
+ * @brief checks and updates the arming/disarming state of the system
+ *
+ * if Throttle is at min and yaw at max positive for 1.5 sec system is armed
+ * if Throttle is at min and yaw at min negative for 1.5 sec system is armed
+ *
+ * @param dt time interval at which the function is called
+ */
 void checkArmingStatus(float dt);
 
+/**
+ * @brief checks whether the Slave controller is active by comparing the value
+ *  of RC channel7
+ */
 uint8_t isSlaveActive(void);
 
-#endif /* ARDUCOPTER_H_ */
+#endif /* ARDUCOPTER_ARDUCOPTER_H */

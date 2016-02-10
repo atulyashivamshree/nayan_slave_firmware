@@ -1,22 +1,15 @@
-/*
- * inertial_nav.h
- *
- *  Created on: 29-Sep-2015
- *      Author: atulya
- */
-
 /**
  * @date 29-Sep-2015
  * @author Atulya Shivam Shree
  * @file inertial_nav.h
- * @brief This file implements the basic inertial navigation system using a complementary filter
+ * @brief Implements the basic inertial navigation system using a complementary filter
  */
 
 #include "stdbool.h"
-#include "config.h"
+#include "APM_config.h"
 
-#ifndef INERTIAL_NAV_H_
-#define INERTIAL_NAV_H_
+#ifndef ARDUCOPTER_INERTIAL_NAV_H
+#define ARDUCOPTER_INERTIAL_NAV_H
 
 #define GRAVITY_MSS 					9.80665f
 #define GRAVITY_CMSS 					100*GRAVITY_MSS
@@ -86,53 +79,75 @@ typedef struct
 	Vector3f position; 				/**< position of the vehicle as calculated by the inertial navigation system #position. */
 	Vector3f accel_correction_hbf; 	//bias in accelerometer readings
 
+	/******************************
+	 ******** Filter gains ********
+	 *****************************/
 	float k1_xy, k2_xy, k3_xy; 		/**< gain parameters for the complimentary filter of the inertial navigation */
 	float k1_z, k2_z, k3_z; 		/**< gain parameters for the complimentary filter of the inertial navigation on z */
 
+	/******************************
+	 ******** GPS Variables *******
+	 *****************************/
 	uint32_t gps_last_update; 		/**< timestamp of the last update to the external postion tracking system #gps_last_update.*/
 	uint32_t gps_last; 				/**< timestamp of the last update to the gps data #gps_last.*/
 	uint8_t flag_gps_glitching;		/**< set to 1 if we have just recovered from a glitch in the GPS*/
-	float lon_to_cm_scaling;         // conversion of longitude to centimeters
-	int32_t last_good_lat;
-	int32_t last_good_lng;
-	uint32_t last_good_gps_update;
+	float lon_to_cm_scaling;        /**< conversion of longitude to centimeters*/
+	int32_t last_good_lat;			/**< last good latitude from GPS*/
+	int32_t last_good_lng;			/**< last good longitude from GPS*/
+	uint32_t last_good_gps_update;	/**< timestamp of the last good GPS data */
 
-	uint32_t baro_last_update;
-	uint32_t baro_last;
-	uint8_t flag_baro_glitching;
-	Vector3f last_good_baro;
-	uint32_t last_good_baro_update;
+	/******************************
+	 ******** Baro Variables ******
+	 *****************************/
+	uint32_t baro_last_update;		/**< timestamp when the altitude was last updated using baro*/
+	uint32_t baro_last;				/**< timestamp of last baro reading*/
+	uint8_t flag_baro_glitching;	/**< set to 1 if we have just recovered from a glitch in the Baro*/
+	float last_good_baro;		/**< last good sltitude readings from baro */
+	uint32_t last_good_baro_update; /**< timestamp of last good baro altitude*/
 
-	uint32_t sonar_last_update;
-	uint32_t sonar_last;
-	uint8_t flag_sonar_glitching;
-	float last_good_sonar;
-	uint32_t last_good_sonar_update;
+	/******************************
+	 *******Sonar Variables *******
+	 *****************************/
+	uint32_t sonar_last_update;		/**< timestamp when altitude was last updated using sonar */
+	uint32_t sonar_last;			/**< timestamp of last sonar reading*/
+	uint8_t flag_sonar_glitching;	/**< set to 1 if we have just recovered from a glitch in the sonar*/
+	float last_good_sonar;			/**< last good altitude readings from sonar */
+	uint32_t last_good_sonar_update;/**< timestamp of last good sonar altitude*/
 
-	uint32_t cv_last_update;
-	uint32_t cv_last;
-	uint8_t flag_cv_glitching;
-	Vector3f last_good_cv;
-	uint32_t last_good_cv_update;
+	/******************************
+	 ******** CV Variables ********
+	 *****************************/
+	uint32_t cv_last_update;		/**< timestamp when position wdas last updated using CV */
+	uint32_t cv_last;				/**< timestamp of last sonar reading*/
+	uint8_t flag_cv_glitching;		/**< set to 1 if we have just recovered from a glitch in CV*/
+	Vector3f last_good_cv;			/**< last good position readings from CV */
+	uint32_t last_good_cv_update;	/**< timestamp of last good CV position update*/
 
-	Vector3f last_good_imu;
-	uint32_t last_good_imu_update;
-	uint32_t last_imu_stamp;
+	/******************************
+	 ******** IMU Variables *******
+	 *****************************/
+	Vector3f last_good_imu_accel;	/**< last good accelerometer readings*/
+	uint32_t last_good_imu_update;	/**< timestamp when inav was last updated using accel*/
+	uint32_t last_imu_stamp;		/**< timestamp of the last good imu readin*/
 
 	float time_constant_xy;			/**< PARAM time constant for the gain parameters #time_constant_xy.*/
 	float time_constant_z;			/**< PARAM time constant for the gain parameters #time_constant_z.*/
 
-	// variables to store historic estimates calculated from the IMU
-	uint8_t historic_xy_counter;
-	float historic_x[AP_HISTORIC_XY_SIZE];
-	float historic_y[AP_HISTORIC_XY_SIZE];
-	Queue_property historic_x_property;
-	Queue_property historic_y_property;
+	/**********************************************
+	 *  Variables to store historic estimates calculated from the IMU
+	 ***********************************************/
+	uint8_t historic_xy_counter;			/**< counter for pushing elements to queue after n iterations*/
+	float historic_x[AP_HISTORIC_XY_SIZE];	/**< queue for storing estiamtes of x*/
+	float historic_y[AP_HISTORIC_XY_SIZE];	/**< queue for storing estimates of y*/
+	Queue_property historic_x_property;		/**< storing property of x queue */
+	Queue_property historic_y_property;		/**< storing property of y queue */
 
-	// variables to store historic estimates calculated from the IMU
-	uint8_t historic_z_counter;
-	float historic_z[AP_HISTORIC_Z_SIZE];
-	Queue_property historic_z_property;
+	/**********************************************
+	 *  Variables to store historic estimates calculated from the IMU
+	 ***********************************************/
+	uint8_t historic_z_counter;				/**< counter for pushing elements to queue after n iterations*/
+	float historic_z[AP_HISTORIC_Z_SIZE];	/**< queue for storing estimates of z */
+	Queue_property historic_z_property;		/**< storing property of z queue */
 
 }Inertial_nav_data;
 
@@ -147,6 +162,9 @@ void updateINAV(uint32_t del_t);
  */
 void initINAV(void);
 
+/**
+ * @brief resets the inertial nav code. Usually required while arming
+ */
 void resetINAV(void);
 
 /**
@@ -159,7 +177,12 @@ void updateAHRS(void);
  */
 void initializeGPSHome(void);
 
+/**
+ * @brief initializes the altitude readings either using sonar or baro
+ */
+
 void initializeAlt(void);
+
 /**
  * @brief sets the position variables to home
  */
@@ -175,6 +198,9 @@ void updateINAVGains(void);
  */
 void setPositionXY(float x, float y);
 
+/**
+ * @brief checks whether the IMU data is glitching
+ */
 int isIMUGlitching(void);
 
-#endif /* INERTIAL_NAV_H_ */
+#endif /* ARDUCOPTER_INERTIAL_NAV_H */

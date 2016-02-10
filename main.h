@@ -56,13 +56,6 @@ typedef struct
 	float depth;
 }Sensor_Depth;
 
-
-typedef struct
-{
-	char name[10];
-	Vector3f vector;
-}DebugVec;
-
 extern Sensor_IMU sens_imu; /**< struct holding current imu variables #sens_imu.*/
 extern Sensor_GPS sens_gps;
 extern Sensor_Depth sens_baro;
@@ -70,9 +63,6 @@ extern Sensor_ExtPos sens_cv;
 extern Sensor_Depth sens_sonar;
 
 extern uint16_t rc_in[7];
-
-//variables for debugging sent through sim_state
-extern DebugVec debug_vec;
 
 extern bool_t dmc;
 

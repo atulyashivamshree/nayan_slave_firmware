@@ -145,6 +145,7 @@ void resetPI_I(Controller_PI_2D *pi)
 {
 	pi->integrator.x = 0;
 	pi->integrator.y = 0;
+	pi->reset_filter = 1;
 }
 
 Vector2f getPI_P(Controller_PI_2D *pi)
@@ -211,12 +212,12 @@ void initializePID(Controller_PID *pid, float kP, float kI, float kD, float imax
 	pid->input = 0;
 	pid->integrator = 0;
 	pid->reset_filter = 1;
-	pid->result = 0;
 }
 
 void resetPID_I(Controller_PID *pid)
 {
 	pid->integrator = 0;
+	pid->reset_filter = 1;
 }
 
 void setPIDInput_FilterAll(Controller_PID *pid, float input)
