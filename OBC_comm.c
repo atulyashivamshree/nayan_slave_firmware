@@ -122,13 +122,12 @@ static void send_status(mavlink_channel_t chan){
 			0,
 			-1,
 			-1,
-			inav.k1_xy*100,
-			inav.k2_z*100,
-			pos_control._p_pos_xy.kP*100,
-			pos_control._p_pos_z.kP*100,
-			pos_control._pi_vel_xy.kI*100,
-			pos_control._pid_accel_z.kP*100
-			);
+			0,
+			0,
+			0,
+			0,
+			0,
+			0);
 }
 
 static void send_debug_msg(mavlink_channel_t chan) {
@@ -281,15 +280,15 @@ static void send_hil_state(mavlink_channel_t chan)
 			pos_control.vel_desired.x,
 			pos_control.vel_desired.y,
 			pos_control.vel_desired.z,
-			pos_control.pos_target.x*10,
-			pos_control.pos_target.y*10,
-			pos_control.pos_target.z*10,
-			pos_control.vel_target.x*10,
-			pos_control.vel_target.y*10,
-			pos_control.vel_target.z*10,
-			pos_control.accel_target_filter_x.output*10,
-			pos_control.accel_target_filter_y.output*10,
-			pos_control.accel_target.z*10
+			pos_control.pos_target.x,
+			pos_control.pos_target.y,
+			pos_control.pos_target.z,
+			pos_control.vel_target.x,
+			pos_control.vel_target.y,
+			pos_control.vel_target.z,
+			pos_control.accel_target_filter_x.output,
+			pos_control.accel_target_filter_y.output,
+			pos_control.accel_target.z
 			);
 }
 
