@@ -353,14 +353,14 @@ void StartTelemetry(void){
 }
 void debug(const char *fmt, ...){
 
-
-	chprintf((BaseSequentialStream *)&SD2, "%s", "Debug: ");
-	va_list ap;
-	va_start(ap, fmt);
-	chvprintf((BaseSequentialStream *)&SD2, fmt, ap);
-	va_end(ap);
-
-	chprintf((BaseSequentialStream *)&SD2, "%s", "\r\n");
+	(void)fmt;
+//	chprintf((BaseSequentialStream *)&SD2, "%s", "Debug: ");
+//	va_list ap;
+//	va_start(ap, fmt);
+//	chvprintf((BaseSequentialStream *)&SD2, fmt, ap);
+//	va_end(ap);
+//
+//	chprintf((BaseSequentialStream *)&SD2, "%s", "\r\n");
 
 }
 /**
@@ -370,9 +370,6 @@ uint32_t millis(void){
 	return ST2MS(chTimeNow());
 }
 
-uint32_t micros(void){
-	return ST2US(chTimeNow());
-}
 /**
  * @Warning DO NOT EDIT THIS FUNCTION!
  */

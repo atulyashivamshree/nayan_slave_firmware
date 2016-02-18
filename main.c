@@ -6,59 +6,51 @@
 #include "main.h"
 #include "Setup.h"
 #include "intercomm.h"
-#include "odroid_comm.h"
+#include "OBC_comm.h"
 
-//variables for state DEBUGGING via the mavlink message sim_state
-float q[4];
-float ang_vel[3];
-/**
- * This variable contains velocity in centimeter per second
- * velocity.x -> velocity along x axis
- * velocity.y -> velocity along y axis
- * velocity.z -> velocity along z axis
- */
-vector_3f velocity;
-
-
-/**
- * This variable contains radio control input values.
- */
-uint16_t rc_in[7];
-
-float local_x_cm = 0;
-float local_y_cm = 0;
-
+//Handles imu data
 Sensor_IMU sens_imu;
-uint32_t last_imu_stamp;
+
+//Handles position data from GPS and Baro
 Sensor_GPS sens_gps;
-uint32_t last_gps_stamp;
-Sensor_ExtPos sens_baro;
-uint32_t last_baro_stamp;
-Sensor_ExtPos sens_cv;
+
+//Handles altitude estimate from baro
+Sensor_Depth sens_baro;
+
+//Handles depth estimate from sonar
 Sensor_Depth sens_sonar;
 
-AHRS ahrs;
-Inertial_nav_data inav;
-Position_Controller pos_control;
-WP_Nav wp_nav;
+//Handles position data from OBC. This is being updated at handleMessage()
+//function in OBC.c
+Sensor_ExtPos sens_cv;
 
-int count_arming = 1000;
-uint8_t FLAG_ARMING = 0;
+//Handles radio control inputs
+uint16_t rc_in[7];
 
-inline void checkArmingStatus(void)
-{
-	//CONDITION FOR MOTORS BEING ARMED(Note that these values may need to recalibrated in case remote is changed)
-	if(rc_in[2] < (THROTTLE_MIN + 80) && rc_in[3] > (STICK_MAX - 80))
-	{
-		if(count_arming < 100)			//pressed continuously for 1 sec @100Hz
-			count_arming++;
-	}
-	else
-	{
-		if(count_arming > 0)
-			count_arming--;
-	}
-}
+//If TRUE -> control_command control motors directly (This will bypass Master Controller) (Use Very Cautiously)
+//if FALSE-> control_command are setpoints for attitude controller running on Master Processor
+bool_t dmc = FALSE;
+
+/**
+ * This array is passed to Master controller for Motor Control.
+ * Update these variables with desired value as Output of your control Algorithm
+ *
+ * If dmc = TRUE,
+ * control_command[0] -> Motor 1
+ * control_command[1] -> Motor 2
+ * control_command[2] -> Motor 3
+ * control_command[3] -> Motor 4
+ *
+ * If dmc = FALSE,
+ * control_command[0] -> Desired Roll		(Range: 1000 to 2000)(Scaling -30deg to +30deg)
+ * control_command[1] -> Desired Pitch		(Range: 1000 to 2000)(Scaling -30deg to +30deg)
+ * control_command[2] -> Desired Throttle
+ * control_command[3] -> Desired Yaw		(Range: 1000 to 2000)(Scaling -90deg/sec to +90deg/sec)
+ *
+ */
+uint16_t control_command[4] = {1500, 1500, 1000, 1500};
+
+DebugVec debug_vec;
 
 int main(void)
 {
@@ -69,59 +61,24 @@ int main(void)
 
 	delay(1000);
 
-	debug("intializing");
+	OBC_comm_init();
 
-	odroid_comm_init();
-	initializePosController();
-	resetController();
-	initializeWPNav();
-	initINAV();
+	initializeArducopter();
 
 	while(TRUE)
 	{
-		uint32_t start = chTimeNow();
-		if(sens_imu.stamp > last_imu_stamp)
-		{
-			if(isIMUGlitching() == 0)
-			{
-				updateAHRS();
-				updateINAV(sens_imu.stamp - last_imu_stamp);
-				last_imu_stamp = sens_imu.stamp;
-			}
-			else
-			{
-				debug("IMU glitched");
-				debug("IMU LLP : %d,%f,%f,%f",sens_imu.stamp, sens_imu.attitude.x, sens_imu.attitude.y, sens_imu.attitude.z);
-				debug("AHRS : %d,%f,%f,%f",ahrs.stamp, ahrs.attitude.x, ahrs.attitude.y, ahrs.attitude.z);
-				delay(10);
-				continue;
-			}
-		}
 
-		//CONDITION FOR RUNNING LOITER to be run only when the switch is pressed on for the HLP code transfer
-		//(Note that these values may need to recalibrated in case remote is changed)
-		float chnl6_out = applyLPF(&wp_nav.channel6_filter, rc_in[6], 0.01);
-		if(chnl6_out > (2000 + 917)/2)
-			loiter_run();
-		else
-			resetController();
+		/**
+		 * User code goes here. This loop will be executed at 100Hz
+		 */
 
-		checkArmingStatus();
+		uint32_t t_now = millis();
 
-		if(count_arming == 100 && FLAG_ARMING == 0)
-		{
-			FLAG_ARMING = 1;
-			resetINAV();						//need to reset the baro when arming
-		}
-		else if( count_arming == 0)
-			FLAG_ARMING = 0;
+		runArducopter(t_now);
 
 		delay(10);
 		debug("Alive");
 
-		uint32_t stop = chTimeNow();
-		float duration = (stop-start)/0.1f;
-//		debug("Time for execution of code is %f us", duration);
 	}
 	return 0;
 }

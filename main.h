@@ -11,41 +11,34 @@
 #include "ch.h"
 #include "hal.h"
 #include "Setup.h"
-#include "intercomm.h"
-#include "autopilot_math.h"
-#include "inertial_nav.h"
-#include "position_controller.h"
-#include "wp_nav.h"
-
-#define M_PI_F 3.141592653589793f
-#define DEG_TO_RAD 0.017453292519943295769236907684886f
-#define RAD_TO_DEG 57.295779513082320876798154814105f
+#include "Arducopter/arducopter.h"
 
 /**
  * @brief stores the raw imu variables acceleration and the angular velocity
  */
 typedef struct
 {
-	uint32_t stamp; /**> timestamp of the instant data was obtained #stamp.*/
-	Vector3f accel_calib; /**> acceleration as measured by the accelerometer and calibrated #accel_calib.*/
-	Vector3f gyro_calib; /**> angular velocity as measured in the body frame by imu #angular_velocity.*/
-	Vector3f attitude; /**> attitude as measured in the body frame by imu #angular_velocity.*/
+	uint32_t stamp; /* System Time of the instant at which data was obtained in  milliseconds */
+	Vector3f accel; /* calibrated acceleration from IMU in meter per seconds in Body Frame*/
+	Vector3f gyro; /* calibrated angular velocities from IMU in radian per seconds in Body Frame*/
+	Vector3f attitude; /* attitude as measured in the body frame by imu in radians in Body Frame*/
 }Sensor_IMU;
 
 
 /**
- * @brief stores the gps latitude and longitude data along with the fused altitude
+ * @brief stores the gps latitude and longitude data along with the fused altitude from Barometer
  */
 typedef struct
 {
-	uint32_t stamp;
-	int32_t lat;
-	int32_t lng;
-	float alt;
+	uint32_t stamp;/* System Time of the instant at which data was obtained in  milliseconds */
+	int32_t lat;/* Latitude * 1E07 from GPS */
+	int32_t lng;/* Longitude * 1E07 from GPS */
+	float alt;/* Relative Altitude from Barometer in cm*/
+	Vector3f vel; /* Velocities from GPS in cm per sec in NED frame*/
 }Sensor_GPS;
-
 /**
  * @brief struct to acquire data from an external position sensor such as a vision based system
+ * @note This is being updated at handleMessage() in OBC_comm.c
  */
 typedef struct
 {
@@ -62,45 +55,17 @@ typedef struct
 	uint64_t obc_stamp;
 	float depth;
 }Sensor_Depth;
-/**
- * @brief stores the current attitude and the trigonometric values for future use
- */
-typedef struct
-{
-	uint32_t stamp;
-	Vector3f attitude;
-
-	int32_t lat_home;
-	int32_t lng_home;
-	float alt_home;
-
-	float sin_phi, cos_phi;
-	float sin_theta, cos_theta;
-	float sin_psi, cos_psi;
-
-	Vector3f accel_ef;
-}AHRS;
 
 extern Sensor_IMU sens_imu; /**< struct holding current imu variables #sens_imu.*/
 extern Sensor_GPS sens_gps;
-extern Sensor_ExtPos sens_baro;
+extern Sensor_Depth sens_baro;
 extern Sensor_ExtPos sens_cv;
 extern Sensor_Depth sens_sonar;
 
-extern AHRS ahrs;
-extern Inertial_nav_data inav; /**< data structure storing the inertial navigation crucial data #inav. */
-extern Position_Controller pos_control;
-extern WP_Nav wp_nav;
-
-extern vector_3f velocity;
 extern uint16_t rc_in[7];
 
-//variables for sim_state
-extern float q[4];
-extern float ang_vel[3];
+extern bool_t dmc;
 
-//TODO remove the temp variables after use
-extern float local_x_cm;
-extern float local_y_cm;
+extern uint16_t control_command[4];
 
 #endif /* MAIN_H_ */
