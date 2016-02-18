@@ -344,7 +344,7 @@ static msg_t mavlinkSend(void *arg) {
   while (TRUE) {
 
 	  //The 1Hz messages
-	  if(hbt_cnt > 199)
+	  if(hbt_cnt > 99)
 	  {
 		  palTogglePad(GPIOC, 1);
 		  send_heart_beat(MAVLINK_COMM_0);
@@ -352,8 +352,8 @@ static msg_t mavlinkSend(void *arg) {
 		  hbt_cnt = 0;
 	  }
 
-	  //Each of the following cases is run at 25Hz
-	  //Messages which are present twice get published at 50Hz
+	  //Each of the following cases is run at 12.5Hz
+	  //Messages which are present twice get published at 25Hz
 	  uint8_t temp_iter = hbt_cnt%8;
 	  switch(temp_iter) {
 		  case 0:
@@ -362,9 +362,10 @@ static msg_t mavlinkSend(void *arg) {
 			  break;
 		  case 1:
 			  send_gps(MAVLINK_COMM_0);
+
 			  break;
 		  case 2:
-			  send_local_position_ned(MAVLINK_COMM_0);
+			  send_scaled_imu(MAVLINK_COMM_0);
 			  send_nav_controller_output(MAVLINK_COMM_0);
 			  break;
 		  case 3:
@@ -379,7 +380,7 @@ static msg_t mavlinkSend(void *arg) {
 			  send_override_outputs(MAVLINK_COMM_0);
 			  break;
 		  case 6:
-			  send_local_position_ned(MAVLINK_COMM_0);
+			  send_scaled_imu(MAVLINK_COMM_0);
 			  send_nav_controller_output(MAVLINK_COMM_0);
 			  break;
 		  case 7:
@@ -392,10 +393,11 @@ static msg_t mavlinkSend(void *arg) {
 #if(LOGGING_MODE == 1)
 
 	//TODO change the sending rates after the debugging stage
+	  send_local_position_ned(MAVLINK_COMM_0);
 	  send_sim_state(MAVLINK_COMM_0);
 	  send_hil_state(MAVLINK_COMM_0);
 
-	  chThdSleep(US2ST(4500));
+	  chThdSleep(US2ST(9500));
 	  hbt_cnt++;
 #endif
 

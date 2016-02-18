@@ -122,8 +122,6 @@ void updateSystemState(void)
 	Vector2f velxy;
 	velxy = (Vector2f){inav.velocity.x, inav.velocity.y};
 
-	debug_vec2.x = pos_control._flags.xy_control_to_pilot;
-
 	//update the state for control
 #if (USE_GPS_NOT_CV == 1)
 	sys_state.onboard_control_sensors_health |= MAV_SYS_STATUS_SENSOR_XY_POSITION_CONTROL;

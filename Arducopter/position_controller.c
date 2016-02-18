@@ -465,9 +465,13 @@ static void accelToThrottle(float accel_target_z)
 	// get d term
 	d = getPID_D(&pos_control._pid_accel_z);
 
+	debug_vec2.x = p;
+	debug_vec2.y = i;
+
 //	debug("integral gain is %f, integral is %f, dt is %f", pos_control._pid_accel_z.kI,
 //														i, pos_control._pid_accel_z.dt);
 	pos_control.throttle_in = p+i+d+pos_control.param_throttle_hover;
+	debug_vec2.z = pos_control.throttle_in;
 
 //	    _attitude_control.set_throttle_out(thr_out, true, POSCONTROL_THROTTLE_CUTOFF_FREQ);			//used in wp_nav.c loiter_run
 
@@ -698,7 +702,7 @@ void setThrottleOut(float throttle_in, uint8_t apply_angle_boost)
 	if(apply_angle_boost == 1)
 	{
 //		throttle_out = (throttle_in - (THROTTLE_MIN+130-200))*boost_factor + (THROTTLE_MIN+130-200);		//throttle min was 130/1000 from nayan llp parameters
-		throttle_out = (throttle_in - (THROTTLE_MIN+130))*boost_factor + (THROTTLE_MIN+130);
+		throttle_out = (throttle_in - (THROTTLE_MIN+0))*boost_factor + (THROTTLE_MIN+0);
 	}
 	else
 		throttle_out = throttle_in;

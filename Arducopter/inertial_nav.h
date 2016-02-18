@@ -34,14 +34,14 @@
 
 //============CONTROL VARIABLES FOR DIFFERENT ACTIONS==============
 // WARNING: state estimation using CV and SONAR are not stable as of now. Switch to CV and SONAR with caution
-#define USE_BARO_NOT_SONAR							0		//0 for sonar 1 for baro
-#define USE_GPS_NOT_CV								0		//0 for cv 1 for GPS
+#define USE_BARO_NOT_SONAR							1		//0 for sonar 1 for baro
+#define USE_GPS_NOT_CV								1		//0 for cv 1 for GPS
 #define LOGGING_MODE								1		//0 for normal operation 1 for LOGGING controller data
 //=================================================================
 
 #if (USE_BARO_NOT_SONAR == 1)
 	#define AP_HISTORIC_Z_SIZE						COUNT_Z_DELAY_BARO
-	#define AP_INTERTIALNAV_TC_Z    				1.5f // default time constant for complementary filter's Z axis
+	#define AP_INTERTIALNAV_TC_Z    				1.0f // default time constant for complementary filter's Z axis
 	#define POSTARGET_MAX_ALTITUDE					1000
 	#define POSTARGET_MIN_ALTITUDE					-1000
 #else

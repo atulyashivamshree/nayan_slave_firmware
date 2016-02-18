@@ -189,12 +189,12 @@ void getWPNavDesiredVelocity()
 		velocity_xy_des.y = velocity_xy_des.y * WPNAV_LOITER_SPEED_MIN/vel_xy;
 	}
 
-	if(fabs(velocity_z_des) > WPNAV_WP_SPEED_DOWN && fabs(velocity_z_des)>0)
+	if(fabs(velocity_z_des) > WPNAV_WP_SPEED_DOWN/6 && fabs(velocity_z_des)>0)
 	{
 		if(velocity_z_des > 0)
-			velocity_z_des = WPNAV_WP_SPEED_DOWN;
+			velocity_z_des = WPNAV_WP_SPEED_DOWN/6;
 		if(velocity_z_des < 0)
-			velocity_z_des = -WPNAV_WP_SPEED_DOWN;
+			velocity_z_des = -WPNAV_WP_SPEED_DOWN/6;
 	}
 
 	getNavDesiredVelocity(velocity_xy_des);

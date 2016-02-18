@@ -66,7 +66,7 @@
 #define AUTO_WPNAV_COUNT_THRESHOLD			100		// IGNORE at 50Hz stick input the sticks must be in idle stage for 2 secs for AUTO_WPNAV to be active
 
 #define WPNAV_Kp_POS_XY						0.6		// IGNORE velocity inputs for waypoint navigation
-#define WPNAV_Kp_POS_Z						0.5		// IGNORE velocity inputs for z reference hold in waypoint navigation
+#define WPNAV_Kp_POS_Z						0.2		// IGNORE velocity inputs for z reference hold in waypoint navigation
 
 typedef struct ap_waypoint_nav
 {
