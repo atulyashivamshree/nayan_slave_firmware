@@ -104,9 +104,9 @@ static void send_attitude(mavlink_channel_t chan){
 	mavlink_msg_attitude_send(
 			chan,
 			millis(),
-			ahrs.attitude.x,
-			ahrs.attitude.y,
-			ahrs.attitude.z,
+			sens_imu.attitude.x,
+			sens_imu.attitude.y,
+			sens_imu.attitude.z,
 			sens_imu.gyro.x,
 			sens_imu.gyro.y,
 			sens_imu.gyro.z);
