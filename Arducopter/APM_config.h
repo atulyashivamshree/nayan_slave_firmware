@@ -583,7 +583,7 @@
 // Loiter position control gains
 //
 #ifndef POS_XY_P
- # define POS_XY_P             	0.8f
+ # define POS_XY_P             	1.0f
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
@@ -600,10 +600,10 @@
 // Velocity (horizontal) gains
 //
 #ifndef VEL_XY_P
- # define VEL_XY_P              1.5f
+ # define VEL_XY_P              1.0f
 #endif
 #ifndef VEL_XY_I
- # define VEL_XY_I              0.2f
+ # define VEL_XY_I              0.5f
 #endif
 #ifndef VEL_XY_IMAX
  # define VEL_XY_IMAX           1000

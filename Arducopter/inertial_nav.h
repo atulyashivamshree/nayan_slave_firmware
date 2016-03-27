@@ -58,9 +58,9 @@
 	#define AP_INTERTIALNAV_GPS_LAG_IN_10HZ_INCREMENTS  4       // must not be larger than size of _hist_position_estimate_x and _hist_position_estimate_y
 	#define AP_INTERTIALNAV_TC_XY   					2.0f 	// default time constant for complementary filter's X & Y axis
 #else
-	#define AP_INTERTIALNAV_SAVE_POS_AFTER_ITERATIONS   1
-	#define AP_HISTORIC_XY_SIZE							5
-	#define AP_INTERTIALNAV_GPS_LAG_IN_10HZ_INCREMENTS  4       // must not be larger than size of _hist_position_estimate_x and _hist_position_estimate_y
+	#define AP_INTERTIALNAV_SAVE_POS_AFTER_ITERATIONS   5
+	#define AP_HISTORIC_XY_SIZE							4
+	#define AP_INTERTIALNAV_GPS_LAG_IN_10HZ_INCREMENTS  2       // must not be larger than size of _hist_position_estimate_x and _hist_position_estimate_y
 	#define AP_INTERTIALNAV_TC_XY   					1.0f 	// default time constant for complementary filter's X & Y axis
 #endif
 
