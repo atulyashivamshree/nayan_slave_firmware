@@ -595,28 +595,19 @@ void handleMessage(mavlink_message_t* msg, mavlink_channel_t chan)
      */
     case MAVLINK_MSG_ID_VISION_POSITION_ESTIMATE:
     {
-		/*FIXME BUG in UAS
-		* Transformation in Eigen/Geometry near mat.eulerAngles it has been stated
-		* the returned angles are in the range [0:pi]x[-pi:pi]x[-pi:pi]
-		* In quaternion_to_rpy() present in the file uas_quaternion_utils.cpp in the folder
-		* mavros/mavros/src/lib the function mat.eulerAngles has been used to obtain YPR in
-		* the order 2,1,0
-		* So the yaw obtained is in the range is in [0 pi] which causes a bug
-		* Hence the yaw obtained inside the FCU code is in range of [0 pi] which is wrong coz
-		* -pi/2 was represented as pi/2
-		* So now the yaw angle is sent as roll angle and similarly in FCU the cv yaw is assigned
-		* to the roll angle
-		*/
     	mavlink_vision_position_estimate_t vision_position_inp;
     	mavlink_msg_vision_position_estimate_decode(msg, &vision_position_inp);
 
     	sens_cv.position.x = 100*vision_position_inp.x;				//M to CM
     	sens_cv.position.y = 100*vision_position_inp.y;
-    	sens_cv.position.z = -100*vision_position_inp.z;			//NED to NEU so that altitude is positive
-    	sens_cv.yaw = -vision_position_inp.roll;					//DUe to a bug above
-    	sens_cv.obc_stamp = vision_position_inp.usec;
+    	sens_cv.position.z = 100*vision_position_inp.z;
+    	sens_cv.roll = vision_position_inp.roll;
+    	sens_cv.pitch = vision_position_inp.pitch;
+    	sens_cv.yaw = vision_position_inp.yaw;
     	sens_cv.stamp = millis();
-    	if(fabs(vision_position_inp.yaw - 1) < EPSILON)				// signal sent to ensure CV is active
+    	sens_cv.obc_stamp = vision_position_inp.usec;
+
+    	if(fabs(vision_position_inp.roll - 1) < EPSILON)				// signal sent to ensure CV is active
     		sens_cv.flag_active = 1;
     	else
     		sens_cv.flag_active = 0;

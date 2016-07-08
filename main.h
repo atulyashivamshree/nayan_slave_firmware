@@ -45,6 +45,8 @@ typedef struct
 	uint32_t stamp;
 	uint64_t obc_stamp;
 	Vector3f position;
+	float roll;
+	float pitch;
 	float yaw;
 	uint8_t flag_active;
 }Sensor_ExtPos;
