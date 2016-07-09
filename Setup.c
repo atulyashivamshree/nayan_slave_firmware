@@ -326,7 +326,6 @@ const SerialUSBConfig serusbcfg = {
  */
 void StartTelemetry(void){
 
-
 	sduObjectInit(&SDU1);
 	sduStart(&SDU1, &serusbcfg);
 
@@ -335,7 +334,7 @@ void StartTelemetry(void){
 	usbStart(serusbcfg.usbp, &usbcfg);
 	usbConnectBus(serusbcfg.usbp);
 
-
+#if BOARD == NAYAN
 	static SerialConfig telemetrycfg = {
 			115200,
 			0,
@@ -350,17 +349,34 @@ void StartTelemetry(void){
 
 	delay(3000);
 
+#elif BOARD == V10
+	static SerialConfig telemetrycfg = {
+			115200,
+			0,
+	        USART_CR2_STOP1_BITS | USART_CR2_LINEN,
+	        0
+	};
+
+	sdStart(&SD2, &telemetrycfg);
+	palSetPadMode(GPIOD, 5, PAL_MODE_ALTERNATE(7));
+	palSetPadMode(GPIOD, 6, PAL_MODE_ALTERNATE(7));
+	delay(100);
+
+	delay(3000);
+
+#endif
+
 }
+
 void debug(const char *fmt, ...){
 
-	(void)fmt;
-//	chprintf((BaseSequentialStream *)&SD2, "%s", "Debug: ");
-//	va_list ap;
-//	va_start(ap, fmt);
-//	chvprintf((BaseSequentialStream *)&SD2, fmt, ap);
-//	va_end(ap);
-//
-//	chprintf((BaseSequentialStream *)&SD2, "%s", "\r\n");
+	chprintf((BaseSequentialStream *)&SD2, "%s", "Debug: ");
+	va_list ap;
+	va_start(ap, fmt);
+	chvprintf((BaseSequentialStream *)&SD2, fmt, ap);
+	va_end(ap);
+
+	chprintf((BaseSequentialStream *)&SD2, "%s", "\r\n");
 
 }
 /**
@@ -373,17 +389,30 @@ uint32_t millis(void){
 /**
  * @Warning DO NOT EDIT THIS FUNCTION!
  */
+#if BOARD == NAYAN
 static const SPIConfig slvcfg = {
   NULL,
   GPIOA,
   4,
   0
 };
+
+#elif BOARD == V10
+static const SPIConfig slvcfg = {
+  NULL,
+  GPIOB,
+  12,
+  0
+};
+
+#endif
+
 /**
  * @Warning DO NOT EDIT THIS FUNCTION!
  */
 void start_intercomm(void){
 	delay(15000);
+#if BOARD == NAYAN
 	palSetPadMode(GPIOA, 4, PAL_MODE_OUTPUT_PUSHPULL | PAL_STM32_OSPEED_HIGHEST);
 	palSetPad(GPIOA, 4);
 	palSetPadMode(GPIOA, 5, PAL_MODE_ALTERNATE(5) | PAL_STM32_OSPEED_HIGHEST);
@@ -391,6 +420,18 @@ void start_intercomm(void){
 	palSetPadMode(GPIOA, 7, PAL_MODE_ALTERNATE(5) | PAL_STM32_OSPEED_HIGHEST);
 	delay(50);
 	spiStart(&SPID1, &slvcfg);
+
+#elif BOARD == V10
+	palSetPadMode(GPIOB, 12, PAL_MODE_OUTPUT_PUSHPULL | PAL_STM32_OSPEED_HIGHEST);
+	palSetPadMode(GPIOB, 13, PAL_MODE_ALTERNATE(5) | PAL_STM32_OSPEED_HIGHEST);
+	palSetPadMode(GPIOB, 14, PAL_MODE_ALTERNATE(5));
+	palSetPadMode(GPIOB, 15, PAL_MODE_ALTERNATE(5) | PAL_STM32_OSPEED_HIGHEST);
+	delay(50);
+	spiStart(&SPID2, &slvcfg);
+	palSetPad(GPIOB, 12);
+	delay(50);
+
+#endif
 	delay(50);
 
 }
@@ -398,6 +439,7 @@ void start_intercomm(void){
  * @Warning DO NOT EDIT THIS FUNCTION!
  */
 void start_blink(void){
+#if BOARD == NAYAN
 	palSetPad(GPIOC, 0);
 	palSetPad(GPIOC, 1);
 
@@ -412,19 +454,38 @@ void start_blink(void){
 	delay(500);
 	palClearPad(GPIOC, 0);
 	palClearPad(GPIOC, 1);
+#elif BOARD == V10
+	palSetPad(GPIOE, 0);
+	palSetPad(GPIOE, 1);
+
+	delay(500);
+	palClearPad(GPIOE, 0);
+	palClearPad(GPIOE, 1);
+
+	delay(500);
+	palSetPad(GPIOE, 0);
+	palSetPad(GPIOE, 1);
+
+	delay(500);
+	palClearPad(GPIOE, 0);
+	palClearPad(GPIOE, 1);
+#endif
 }
 /**
  * @Warning DO NOT EDIT THIS FUNCTION!
  */
-static WORKING_AREA(blinkerThread, 4096);
+static WORKING_AREA(blinkerThread, 128);
 static msg_t blinker(void *arg) {
 
   (void)arg;
   chRegSetThreadName("blinker");
 
   while (TRUE) {
+#if BOARD == NAYAN
 	  palTogglePad(GPIOC, 0);
-	  debug("blinker_thread");
+#elif BOARD == V10
+	  palTogglePad(GPIOE, 0);
+#endif
 	  delay(125);
   }
   return 0;
@@ -470,7 +531,7 @@ static msg_t IC_THD(void *arg) {
 			txbuf[((2 * i) + 5)] = ic_rc_or_data.raw[i];
 		}
 
-		 spi_exchange_data(&SPID1, txbuf, rxbuf, 120);
+		 spi_exchange_data(&INTERCOM_SPI, txbuf, rxbuf, 120);
 
 		int16_t cnt = -1;
 		for(i = 0; i < 89; i++){
@@ -498,8 +559,6 @@ static msg_t IC_THD(void *arg) {
 
 		sanity = FALSE;
 		new_data = FALSE;
-
-		debug("IC");
 
 		delay(4);
   }

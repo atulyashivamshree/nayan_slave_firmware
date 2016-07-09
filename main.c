@@ -67,7 +67,6 @@ int main(void)
 
 	while(TRUE)
 	{
-
 		/**
 		 * User code goes here. This loop will be executed at 100Hz
 		 */

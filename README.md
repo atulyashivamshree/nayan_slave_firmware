@@ -20,6 +20,15 @@ Implements Loiter Code from ArduCopter on the nayan HLP
 * `position_controller.h` - implements position controller
 * `wp_nav.h` - Handles loiter and waypoint navigation
 
-## Flashing on the NAYAN HLP
-[nayan_slave_interface](http://aus.co.in/wiki/Nayan_AP_Slave_Processor)
-[nayan_wiki](http://aus.co.in/wiki/Nayan_Wiki)
+###Flashing on the Slave Firmware
+[Slave_Processor_Setup](http://aus.co.in/wiki/Slave_Processor_Setup)
+
+
+###Nayan Wiki
+Visit [http://aus.co.in/wiki](http://aus.co.in/wiki)
+
+###Chibios Documentation
+Visit [http://chibios.sourceforge.net/html/](http://chibios.sourceforge.net/html/) 
+
+###MAVLink
+Visit [http://qgroundcontrol.org/mavlink/start](http://qgroundcontrol.org/mavlink/start)
