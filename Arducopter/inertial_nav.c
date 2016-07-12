@@ -790,6 +790,17 @@ void resetINAV()
 
 #if(USE_GPS_NOT_CV == 1)
 	initializeGPSHome();
+#else
+	setupHomePosition();
+#endif
+
+#if(USE_BARO_NOT_SONAR == 0)
+	inav.position_base.z = 100.0f;
+	inav.position_correction.z = 0.0f;
+	inav.position.z = 0.0f;
+
+	inav.position_error.z = 0.0f;
+	inav.velocity.z = 0;
 #endif
 
 	//initialize IMU
@@ -869,7 +880,6 @@ void updateINAV(uint32_t del_t)
 	//assuming body acceleration more than 10mss is not possible and that this is probably a glitch
 	if(accel_norm > MAX_BODY_ACCEL)
 		return;
-
 
 	//position is assumed with respect to an NEU frame
 	// convert ef position error to horizontal body frame

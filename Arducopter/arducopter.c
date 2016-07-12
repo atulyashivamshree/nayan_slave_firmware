@@ -165,7 +165,7 @@ void updateSystemState(void)
 inline void checkArmingStatus(float dt)
 {
 	//CONDITION FOR MOTORS BEING ARMED(Note that these values may need to recalibrated in case remote is changed)
-	if(rc_in[2] < (STICK_MIN + 80) && rc_in[3] > (STICK_MAX - 80)) {
+	if(rc_in[2] < (STICK_MIN + 100) && rc_in[3] > (STICK_MAX - 100)) {
 		if(sys_state.arming_count < ARMING_TIME)			//pressed continuously for 1 sec @100Hz
 			sys_state.arming_count += dt;
 	}
@@ -175,7 +175,7 @@ inline void checkArmingStatus(float dt)
 	}
 
 	//================check for disarming================
-	if(rc_in[2] < (STICK_MIN + 80) && rc_in[3] < (STICK_MIN + 80)) {
+	if(rc_in[2] < (STICK_MIN + 100) && rc_in[3] < (STICK_MIN + 100)) {
 		if(sys_state.disarming_count < ARMING_TIME)			//pressed continuously for 1 sec @100Hz
 			sys_state.disarming_count += dt;
 	}
