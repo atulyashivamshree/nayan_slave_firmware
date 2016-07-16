@@ -19,7 +19,7 @@
 #include "hal.h"
 #include "Setup.h"
 
-#define USE_SD2_FOR_TELEMETRY	1				//IF 1  SD2 is used for sending telemetry output to GCS
+#define USE_SD2_FOR_TELEMETRY	0				//IF 1  SD2 is used for sending telemetry output to GCS
 												//if 0 SD2 is used for sending debug messages(you will need set this value to 0 and
 												//uncomment the code inside debug function in Setup.c
 
@@ -346,7 +346,7 @@ static msg_t mavlinkSend(void *arg) {
 	  //The 1Hz messages
 	  if(hbt_cnt > 99)
 	  {
-		  palTogglePad(GPIOC, 1);
+		  palTogglePad(GPIOE, 1);
 		  send_heart_beat(MAVLINK_COMM_0);
 		  send_status(MAVLINK_COMM_0);
 		  hbt_cnt = 0;
