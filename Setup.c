@@ -422,11 +422,11 @@ void start_intercomm(void){
 	spiStart(&SPID1, &slvcfg);
 
 #elif BOARD == V10
-	palSetPadMode(GPIOB, 12, PAL_MODE_OUTPUT_PUSHPULL | PAL_STM32_OSPEED_HIGHEST);
+/*	palSetPadMode(GPIOB, 12, PAL_MODE_OUTPUT_PUSHPULL | PAL_STM32_OSPEED_HIGHEST);
 	palSetPadMode(GPIOB, 13, PAL_MODE_ALTERNATE(5) | PAL_STM32_OSPEED_HIGHEST);
 	palSetPadMode(GPIOB, 14, PAL_MODE_ALTERNATE(5));
 	palSetPadMode(GPIOB, 15, PAL_MODE_ALTERNATE(5) | PAL_STM32_OSPEED_HIGHEST);
-	delay(50);
+	delay(50);*/
 	spiStart(&SPID2, &slvcfg);
 	palSetPad(GPIOB, 12);
 	delay(50);
@@ -515,7 +515,7 @@ static msg_t IC_THD(void *arg) {
 	ic_rc_or_data.ic_rc.rc7 = 1000;
 
 	while (TRUE) {
-		uint8_t txbuf[40], rxbuf[80];
+		uint8_t txbuf[80], rxbuf[80];
 
 		txbuf[0] = 0x00;
 		txbuf[1] = 0x1E;
@@ -523,15 +523,15 @@ static msg_t IC_THD(void *arg) {
 		txbuf[3] = 0x1D;
 		txbuf[4] = 0x00;
 
-		for( i = 0; i < 40; i = i + 2){
-			txbuf[i] = 0X00;
+		for( i = 0; i < 36; i = i + 2){
+			txbuf[i+5] = 0X00;
 		}
 
 		for(i = 0; i < 14; i++){
-			txbuf[((2 * i) + 5)] = ic_rc_or_data.raw[i];
+			txbuf[(i + 5)] = ic_rc_or_data.raw[i];
 		}
 
-		 spi_exchange_data(&INTERCOM_SPI, txbuf, rxbuf, 120);
+		 spi_exchange_data(&INTERCOM_SPI, txbuf, rxbuf, 80);
 
 		int16_t cnt = -1;
 		for(i = 0; i < 89; i++){
@@ -549,6 +549,10 @@ static msg_t IC_THD(void *arg) {
 				stp = 0;
 			}
 		}
+
+/*		for(i == 0; i < 74; i++){
+			ic_imu_data.raw[i] = rxbuf[i+2];
+		}*/
 
 
 		if(new_data && (!(ic_imu_data.ic_imu.gx == 0 && ic_imu_data.ic_imu.gy == 0 && ic_imu_data.ic_imu.gz == 0)) &&
