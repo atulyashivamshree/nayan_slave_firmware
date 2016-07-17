@@ -205,6 +205,14 @@ void initializeVector2fToZero(Vector2f* inp);
 void resetQueue(float arr[], Queue_property *q_property);
 
 /**
+ * @brief returns the ith index from last assuming that the queue is full else returns the last element
+ * @param arr the array storing the historic values
+ * @param q_property the struct storing the queue properties
+ * @param i the index from last which is required i belongs to [0, size-1]
+ */
+float getElemFromLast(float arr[], Queue_property *q_property, int i);
+
+/**
  * @brief pops the first element of the queue and returns it
  * @param arr the array storing all the elements of the queue
  * @param q_property stores the current state of the queue

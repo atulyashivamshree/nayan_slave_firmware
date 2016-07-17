@@ -362,15 +362,17 @@ static msg_t mavlinkSend(void *arg) {
 			  break;
 		  case 1:
 			  send_gps(MAVLINK_COMM_0);
-
+			  send_hil_state(MAVLINK_COMM_0);
 			  break;
 		  case 2:
+			  send_attitude(MAVLINK_COMM_0);
 			  send_scaled_imu(MAVLINK_COMM_0);
 			  send_nav_controller_output(MAVLINK_COMM_0);
 			  break;
 		  case 3:
 			  send_debug_msg(MAVLINK_COMM_0);
 			  send_rc_in(MAVLINK_COMM_0);
+			  send_hil_state(MAVLINK_COMM_0);
 			  break;
 		  case 4:
 			  send_attitude(MAVLINK_COMM_0);
@@ -378,13 +380,16 @@ static msg_t mavlinkSend(void *arg) {
 			  break;
 		  case 5:
 			  send_override_outputs(MAVLINK_COMM_0);
+			  send_hil_state(MAVLINK_COMM_0);
 			  break;
 		  case 6:
+			  send_attitude(MAVLINK_COMM_0);
 			  send_scaled_imu(MAVLINK_COMM_0);
 			  send_nav_controller_output(MAVLINK_COMM_0);
 			  break;
 		  case 7:
 			  send_vfr_hud(MAVLINK_COMM_0);
+			  send_hil_state(MAVLINK_COMM_0);
 			  break;
 		  default:
 			  break;
@@ -395,7 +400,6 @@ static msg_t mavlinkSend(void *arg) {
 	//TODO change the sending rates after the debugging stage
 	  send_local_position_ned(MAVLINK_COMM_0);
 	  send_sim_state(MAVLINK_COMM_0);
-	  send_hil_state(MAVLINK_COMM_0);
 
 	  chThdSleep(US2ST(9500));
 	  hbt_cnt++;

@@ -36,6 +36,8 @@ extern const char accel_z_imax[16];			/**< Imax for the z acceleration PID contr
 extern const char accel_z_filt_hz[16];		/**< filter cutoff frequency for the z acceleration PID controller */
 
 extern const char throttle_hover[16];		/**< throttle required in ideal conditions for hovering*/
+extern const char alt_delay[16];
+extern const char xy_delay[16];
 
 extern const char sysid_thismav_index;
 extern const char sysid_sw_type_index;
@@ -58,8 +60,10 @@ extern const uint8_t accel_z_imax_index;
 extern const uint8_t accel_z_filt_hz_index;
 
 extern const uint8_t throttle_hover_index;
+extern const uint8_t alt_delay_index;
+extern const uint8_t xy_delay_index;
 
-#define PARAM_COUNT 17				//total number of parameters to be sent
+#define PARAM_COUNT 19				//total number of parameters to be sent
 
 //NOTE : IF YOU WANT TO DECLARE FWupdateParamMavLink and FWparamQSend in the .c file then you will have to make comm_ch_send static inside mavlink_helpers.h
 //currently only one instance of the mavlink _helpers is required in the odroid_comm.c file
@@ -316,6 +320,34 @@ void resendParamMavLink(mavlink_channel_t chan, char _name[17], uint8_t param_id
 				 PARAM_COUNT,
 				 throttle_hover_index);		//_queued_parameter_index
 	}
+	if(strcmp(_name, alt_delay) == 0 || alt_delay_index == param_id)
+	{
+		 palSetPad(GPIOC, 12);
+		 chThdSleepMilliseconds(2);
+		 palClearPad(GPIOC, 12);
+
+		 mavlink_msg_param_value_send(
+				 chan,
+				 alt_delay,
+				 inav.z_delay, 			//param value
+				 MAVLINK_TYPE_FLOAT,	//param type
+				 PARAM_COUNT,
+				 alt_delay_index);		//_queued_parameter_index
+	}
+	if(strcmp(_name, xy_delay) == 0 || xy_delay_index == param_id)
+		{
+			 palSetPad(GPIOC, 12);
+			 chThdSleepMilliseconds(2);
+			 palClearPad(GPIOC, 12);
+
+			 mavlink_msg_param_value_send(
+					 chan,
+					 xy_delay,
+					 inav.xy_delay, 			//param value
+					 MAVLINK_TYPE_FLOAT,	//param type
+					 PARAM_COUNT,
+					 xy_delay_index);		//_queued_parameter_index
+		}
 
 }
 
@@ -589,7 +621,40 @@ void FWupdateParamMavLink(mavlink_channel_t chan, char _name[17], float _paramVa
 			 PARAM_COUNT,
 			 throttle_hover_index);		//_queued_parameter_index
 	}
+	if(strcmp(_name, alt_delay) == 0)
+	{
+		if(_paramValue >= 0 && _paramValue < AP_HISTORIC_Z_SIZE)
+			inav.z_delay = _paramValue;
 
+		palSetPad(GPIOC, 12);
+		chThdSleepMilliseconds(2);
+		palClearPad(GPIOC, 12);
+
+		mavlink_msg_param_value_send(
+			 chan,
+			 alt_delay,
+			 inav.z_delay, 			//param value
+			 MAVLINK_TYPE_FLOAT,	//param type
+			 PARAM_COUNT,
+			 alt_delay_index);		//_queued_parameter_index
+	}
+	if(strcmp(_name, xy_delay) == 0)
+	{
+		if(_paramValue >= 0 && _paramValue < AP_HISTORIC_XY_SIZE)
+			inav.xy_delay = _paramValue;
+
+		palSetPad(GPIOC, 12);
+		chThdSleepMilliseconds(2);
+		palClearPad(GPIOC, 12);
+
+		mavlink_msg_param_value_send(
+			 chan,
+			 xy_delay,
+			 inav.xy_delay, 			//param value
+			 MAVLINK_TYPE_FLOAT,	//param type
+			 PARAM_COUNT,
+			 xy_delay_index);		//_queued_parameter_index
+	}
 
 }
 
@@ -707,6 +772,22 @@ void FWparamQSend(mavlink_channel_t chan){
 				 MAVLINK_TYPE_FLOAT,	//param type
 				 PARAM_COUNT,		//_queued_parameter_count
 				 throttle_hover_index);		//_queued_parameter_index
+
+		mavlink_msg_param_value_send(
+				 chan,
+				 alt_delay,
+				 inav.z_delay, 			//param value
+				 MAVLINK_TYPE_FLOAT,	//param type
+				 PARAM_COUNT,
+				 alt_delay_index);		//_queued_parameter_index
+
+		mavlink_msg_param_value_send(
+				 chan,
+				 xy_delay,
+				 inav.xy_delay, 			//param value
+				 MAVLINK_TYPE_FLOAT,	//param type
+				 PARAM_COUNT,
+				 xy_delay_index);		//_queued_parameter_index
 
 }
 
