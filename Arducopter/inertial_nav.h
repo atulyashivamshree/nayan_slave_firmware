@@ -23,6 +23,7 @@
 
 #define COUNT_Z_DELAY_BARO							2
 #define COUNT_Z_DELAY_SONAR							25
+#define COUNT_DELAY_EKF								3
 		// assuming a 150 ms delay for the baro data if the AHRS is called at 100Hz
 #define GPS_RADIUS_CM								400
 #define BARO_RADIUS_CM								250
@@ -45,7 +46,9 @@
 	#define POSTARGET_MAX_ALTITUDE					1000
 	#define POSTARGET_MIN_ALTITUDE					-1000
 #else
-	#define AP_HISTORIC_Z_SIZE						COUNT_Z_DELAY_SONAR
+	#define AP_HISTORIC_Z_SIZE						40
+//	#define ALT_DELAY								COUNT_Z_DELAY_SONAR
+	#define ALT_DELAY								COUNT_DELAY_EKF
 	#define AP_INTERTIALNAV_TC_Z    				1.0f // default time constant for complementary filter's Z axis
 	#define POSTARGET_MAX_ALTITUDE					250
 	#define POSTARGET_MIN_ALTITUDE					50
@@ -58,8 +61,9 @@
 	#define AP_INTERTIALNAV_GPS_LAG_IN_10HZ_INCREMENTS  4       // must not be larger than size of _hist_position_estimate_x and _hist_position_estimate_y
 	#define AP_INTERTIALNAV_TC_XY   					2.0f 	// default time constant for complementary filter's X & Y axis
 #else
-	#define AP_INTERTIALNAV_SAVE_POS_AFTER_ITERATIONS   5
-	#define AP_HISTORIC_XY_SIZE							4
+	#define AP_HISTORIC_XY_SIZE							40
+	#define XY_DELAY									COUNT_DELAY_EKF
+	#define AP_INTERTIALNAV_SAVE_POS_AFTER_ITERATIONS   1
 	#define AP_INTERTIALNAV_GPS_LAG_IN_10HZ_INCREMENTS  2       // must not be larger than size of _hist_position_estimate_x and _hist_position_estimate_y
 	#define AP_INTERTIALNAV_TC_XY   					1.0f 	// default time constant for complementary filter's X & Y axis
 #endif
@@ -141,6 +145,7 @@ typedef struct
 	float historic_y[AP_HISTORIC_XY_SIZE];	/**< queue for storing estimates of y*/
 	Queue_property historic_x_property;		/**< storing property of x queue */
 	Queue_property historic_y_property;		/**< storing property of y queue */
+	uint8_t xy_delay;
 
 	/**********************************************
 	 *  Variables to store historic estimates calculated from the IMU
@@ -148,6 +153,7 @@ typedef struct
 	uint8_t historic_z_counter;				/**< counter for pushing elements to queue after n iterations*/
 	float historic_z[AP_HISTORIC_Z_SIZE];	/**< queue for storing estimates of z */
 	Queue_property historic_z_property;		/**< storing property of z queue */
+	uint8_t z_delay;
 
 }Inertial_nav_data;
 

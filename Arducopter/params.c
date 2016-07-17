@@ -35,6 +35,8 @@ const char accel_z_d[16] = "ACCEL_Z_D";
 const char accel_z_filt_hz[16] = "ACCEL_Z_FILT_HZ";
 
 const char throttle_hover[16] = "THR_MID";
+const char alt_delay[16] = "ALT_DELAY";
+const char xy_delay[16] = "XY_DELAY";
 
 const char sysid_thismav_index = 0;
 const char sysid_sw_type_index = 1;
@@ -56,6 +58,8 @@ const uint8_t accel_z_d_index = 13;
 const uint8_t accel_z_imax_index = 14;
 const uint8_t accel_z_filt_hz_index = 15;
 const uint8_t throttle_hover_index = 16;
+const uint8_t alt_delay_index = 17;
+const uint8_t xy_delay_index = 18;
 
 //void updatePIDFromEEPROM(void);	TODO FUTURE SCOPE
 //void writeDefaultParam(void);		TODO FUTURE SCOPE

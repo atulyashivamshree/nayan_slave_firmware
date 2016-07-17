@@ -334,8 +334,11 @@ static void correctWithCV(float dt)
 
 			if(inav.historic_x_property.is_full)
 			{
-				historic_position_base.x = popQueue(inav.historic_x, &inav.historic_x_property);
-				historic_position_base.y = popQueue(inav.historic_y, &inav.historic_y_property);
+				historic_position_base.x = getElemFromLast(inav.historic_x, &inav.historic_x_property, inav.xy_delay);
+				historic_position_base.y = getElemFromLast(inav.historic_y, &inav.historic_y_property, inav.xy_delay);
+				debug_vec2.x = historic_position_base.y;
+//				historic_position_base.x = popQueue(inav.historic_x, &inav.historic_x_property);
+//				historic_position_base.y = popQueue(inav.historic_y, &inav.historic_y_property);
 			}
 			else
 			{
@@ -596,7 +599,11 @@ static void correctWithSonar(float dt)
 			Vector3f historic_position_base;
 
 			if(inav.historic_z_property.is_full)
-				historic_position_base.z = popQueue(inav.historic_z, &inav.historic_z_property);
+			{
+//				historic_position_base.z = popQueue(inav.historic_z, &inav.historic_z_property);
+				debug_vec.vector.x = inav.z_delay;
+				historic_position_base.z = getElemFromLast(inav.historic_z, &inav.historic_z_property, inav.z_delay);
+			}
 			else
 				historic_position_base.z = inav.position_base.z;
 
@@ -734,6 +741,8 @@ void initINAV()
 	resetQueue(inav.historic_x, &inav.historic_x_property);
 	resetQueue(inav.historic_y, &inav.historic_y_property);
 	resetQueue(inav.historic_z, &inav.historic_z_property);
+	inav.z_delay = ALT_DELAY;
+	inav.xy_delay = XY_DELAY;
 
 	//initialize local xy
 	inav.local_x_cm = 0;
@@ -936,14 +945,10 @@ void updateINAV(uint32_t del_t)
 //	debug("velocity is %.2f, velocity increase is %.2f", inav.velocity.z, velocity_increase.z);
 
 	pushToQueue(inav.position_base.z, inav.historic_z, &inav.historic_z_property);
+	debug_vec2.y = inav.position_base.y;
 
 	// store 3rd order estimate (i.e. horizontal position) for future use at 10hz
-	inav.historic_xy_counter++;
-	if( inav.historic_xy_counter >= AP_INTERTIALNAV_SAVE_POS_AFTER_ITERATIONS )
-	{
-		inav.historic_xy_counter = 0;
-		pushToQueue(inav.position_base.x, inav.historic_x, &inav.historic_x_property);
+	pushToQueue(inav.position_base.x, inav.historic_x, &inav.historic_x_property);
 //		printQueue(inav.historic_x, inav.historic_x_property);
-		pushToQueue(inav.position_base.y, inav.historic_y, &inav.historic_y_property);
-	}
+	pushToQueue(inav.position_base.y, inav.historic_y, &inav.historic_y_property);
 }

@@ -29,6 +29,29 @@ void resetQueue(float arr[], Queue_property *q_property)
 	q_property->is_full = 0;
 }
 
+/**
+ * @brief returns the ith index from last assuming that the queue is full else returns the last element
+ * @param arr the array storing the historic values
+ * @param q_property the struct storing the queue properties
+ * @param i the index from last which is required i belongs to [0, size-1]
+ */
+float getElemFromLast(float arr[], Queue_property *q_property, int i)
+{
+	float elem;
+	if(i > q_property->size-1)
+		i = q_property->size-1;
+	if(i<0)
+		i = 0;
+	if(q_property->is_full)
+	{
+		elem = arr[(q_property->last - i + q_property->size)%q_property->size];
+	}
+	else
+		elem = arr[q_property->last];
+
+	return elem;
+}
+
 float popQueue(float arr[], Queue_property *q_property)
 {
 	if(q_property->counter == 0)
