@@ -534,19 +534,22 @@ static msg_t IC_THD(void *arg) {
 		 spi_exchange_data(&INTERCOM_SPI, txbuf, rxbuf, 80);
 
 		int16_t cnt = -1;
-		for(i = 0; i < 89; i++){
-			if(cnt >= 0 && cnt < 74){
-				ic_imu_data.raw[cnt] = rxbuf[i];
-			  cnt++;
-			  new_data = TRUE;
-			}
 
-			else if((rxbuf[i] == IC_IMU_H) && stp == 0){
-				stp++;
-			}
-			else if((stp == 1) && (rxbuf[i] == 0x2D)){
-				cnt = 0;
-				stp = 0;
+		if((rxbuf[0] ==  IC_IMU_H) && (rxbuf[1] == 0x2D)){
+			for(i = 0; i < 89; i++){
+				if(cnt >= 0 && cnt < 74){
+					ic_imu_data.raw[cnt] = rxbuf[i];
+				  cnt++;
+				  new_data = TRUE;
+				}
+
+				else if((rxbuf[i] == IC_IMU_H) && stp == 0){
+					stp++;
+				}
+				else if((stp == 1) && (rxbuf[i] == 0x2D)){
+					cnt = 0;
+					stp = 0;
+				}
 			}
 		}
 
