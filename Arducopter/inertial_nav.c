@@ -601,7 +601,6 @@ static void correctWithSonar(float dt)
 			if(inav.historic_z_property.is_full)
 			{
 //				historic_position_base.z = popQueue(inav.historic_z, &inav.historic_z_property);
-				debug_vec.vector.x = inav.z_delay;
 				historic_position_base.z = getElemFromLast(inav.historic_z, &inav.historic_z_property, inav.z_delay);
 			}
 			else
@@ -668,41 +667,53 @@ void initializeGPSHome()
 	setupHomePosition();
 }
 
-void setupHomePosition()
+void setupHomePositionCV()
 {
+	debug("Initializing HOME XY");
+	bool flag_EXT_POS_XY_FOUND = 0;
+	while(!flag_EXT_POS_XY_FOUND)
+	{
+		debug("Waiting for Ext Pos to send data");
+		if(sens_cv.stamp > inav.cv_last)
+			flag_EXT_POS_XY_FOUND = 1;
+
+		debug("waiting for altitude");
+		delay(100);
+	}
+
 	// reset corrections to base position to zero
-	inav.position_base.x = 0.0f;
-	inav.position_base.y = 0.0f;
+	inav.position_base.x = sens_cv.position.x;
+	inav.position_base.y = sens_cv.position.y;
 	inav.position_correction.x = 0.0f;
 	inav.position_correction.y = 0.0f;
-	inav.position.x = 0.0f;
-	inav.position.y = 0.0f;
+	inav.position.x = sens_cv.position.x;
+	inav.position.y = sens_cv.position.y;
+
+	inav.last_good_cv.x = sens_cv.position.x;
+	inav.last_good_cv.y = sens_cv.position.y;
+	inav.last_good_cv_update = sens_cv.stamp;
 
 	inav.position_error.x = 0.0f;
 	inav.position_error.y = 0.0f;
 	inav.velocity.x = 0;
 	inav.velocity.y = 0;
 
-	// clear historic estimates
-	resetQueue(inav.historic_x, &inav.historic_x_property);
-	resetQueue(inav.historic_y, &inav.historic_y_property);
-
 }
 
 void initializeAlt()
 {
 	debug("Initializing altitude");
-	bool flag_EXT_POS_HOME_FOUND = 0;
-	while(!flag_EXT_POS_HOME_FOUND)
+	bool flag_EXT_POS_ALT_FOUND = 0;
+	while(!flag_EXT_POS_ALT_FOUND)
 	{
 #if (USE_BARO_NOT_SONAR == 1)
 		debug("Waiting for Baro to send data");
 		if(sens_baro.stamp != 0)
-			flag_EXT_POS_HOME_FOUND = 1;
+			flag_EXT_POS_ALT_FOUND = 1;
 #else
 		debug("Waiting for SONAR to send data");
-		if(sens_sonar.stamp != 0)
-			flag_EXT_POS_HOME_FOUND = 1;
+		if(sens_sonar.stamp > inav.sonar_last)
+			flag_EXT_POS_ALT_FOUND = 1;
 #endif
 		debug("waiting for altitude");
 		delay(100);
@@ -747,6 +758,7 @@ void initINAV()
 	//initialize local xy
 	inav.local_x_cm = 0;
 	inav.local_y_cm = 0;
+	inav.last_update = 0;
 
 	//update the gain parameters
 	inav.time_constant_xy = AP_INTERTIALNAV_TC_XY;
@@ -767,6 +779,8 @@ void initINAV()
 
 #if(USE_GPS_NOT_CV == 1)
 	initializeGPSHome();
+#else
+	setupHomePositionCV();
 #endif
 
 	//TODO find out if initialization with some initial values and averagin is useful
@@ -800,7 +814,7 @@ void resetINAV()
 #if(USE_GPS_NOT_CV == 1)
 	initializeGPSHome();
 #else
-	setupHomePosition();
+	setupHomePositionCV();
 #endif
 
 #if(USE_BARO_NOT_SONAR == 0)
@@ -824,7 +838,7 @@ void resetINAV()
 void updateINAVGains()
 {
 	debug("Previous inav gains k1_xy : %f, k2_xy : %f, k3_xy", inav.k1_xy, inav.k2_xy, inav.k3_xy);
-	debug("Previous inav gains k1_z : %f, k2_z : %f, k3_z", inav.k1_xy, inav.k2_xy, inav.k3_xy);
+	debug("Previous inav gains k1_z : %f, k2_z : %f, k3_z", inav.k1_z, inav.k2_z, inav.k3_z);
 	// X & Y axis time constant
 	if (inav.time_constant_xy == 0.0f)
 	{
@@ -849,8 +863,22 @@ void updateINAVGains()
 		inav.k3_z = 1.0f / (inav.time_constant_z*inav.time_constant_z*inav.time_constant_z);
 	}
 	debug("Current inav gains k1_xy : %f, k2_xy : %f, k3_xy", inav.k1_xy, inav.k2_xy, inav.k3_xy);
-	debug("Current inav gains k1_z : %f, k2_z : %f, k3_z", inav.k1_xy, inav.k2_xy, inav.k3_xy);
+	debug("Current inav gains k1_z : %f, k2_z : %f, k3_z", inav.k1_z, inav.k2_z, inav.k3_z);
 }
+
+void updateINAVGainsIndividually(float kp1, float kp2, float kp3)
+{
+	debug("Previous inav gains k1_xy : %f, k2_xy : %f, k3_xy", inav.k1_xy, inav.k2_xy, inav.k3_xy);
+	debug("Previous inav gains k1_z : %f, k2_z : %f, k3_z", inav.k1_z, inav.k2_z, inav.k3_z);
+
+	inav.k1_xy = kp1;
+	inav.k2_xy = kp2;
+	inav.k3_xy = kp3;
+
+	debug("Current inav gains k1_xy : %f, k2_xy : %f, k3_xy", inav.k1_xy, inav.k2_xy, inav.k3_xy);
+	debug("Current inav gains k1_z : %f, k2_z : %f, k3_z", inav.k1_z, inav.k2_z, inav.k3_z);
+}
+
 
 void updateINAV(uint32_t del_t)
 {
@@ -890,6 +918,8 @@ void updateINAV(uint32_t del_t)
 	if(accel_norm > MAX_BODY_ACCEL)
 		return;
 
+//	dt = dt*1.1f;
+	debug_vec.vector.x = dt;
 	//position is assumed with respect to an NEU frame
 	// convert ef position error to horizontal body frame
 	Vector2f position_error_hbf;
@@ -921,6 +951,9 @@ void updateINAV(uint32_t del_t)
 	// calculate velocity increase adding new acceleration from accelerometers
 	Vector3f velocity_increase;
 	velocity_increase.x = (accel_ef.x + accel_correction_ef.x) * dt;
+	debug_vec2.x = accel_ef.x;
+	debug_vec2.y = accel_correction_ef.x;
+	debug_vec2.z = velocity_increase.x;
 	velocity_increase.y = (accel_ef.y + accel_correction_ef.y) * dt;
 	velocity_increase.z = (accel_ef.z + inav.accel_correction_hbf.z) * dt;
 

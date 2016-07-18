@@ -323,9 +323,9 @@ static void send_sim_state(mavlink_channel_t chan)
 			alt,
 			0,
 			0,
-			inav.velocity.x,
-			inav.velocity.y,
-			inav.velocity.z
+			sens_gps.vel.x*100.0f,
+			sens_gps.vel.y*100.0f,
+			sens_gps.vel.z*100.0f
 			);
 }
 
