@@ -132,16 +132,6 @@ bool_t isAttitudeSane(void)
 bool_t isRCInputSane(void)
 {
 
-	if(isnan(ic_imu_data.ic_imu.rc_in_1) || isnan(ic_imu_data.ic_imu.rc_in_2) || isnan(ic_imu_data.ic_imu.rc_in_3) ||
-			isnan(ic_imu_data.ic_imu.rc_in_4) || isnan(ic_imu_data.ic_imu.rc_in_5) || isnan(ic_imu_data.ic_imu.rc_in_6) ||
-			isnan(ic_imu_data.ic_imu.rc_in_7))
-		return FALSE;
-
-	if(isinf(ic_imu_data.ic_imu.rc_in_1) || isinf(ic_imu_data.ic_imu.rc_in_2) || isinf(ic_imu_data.ic_imu.rc_in_3) ||
-			isinf(ic_imu_data.ic_imu.rc_in_4) || isinf(ic_imu_data.ic_imu.rc_in_5) || isinf(ic_imu_data.ic_imu.rc_in_6) ||
-			isinf(ic_imu_data.ic_imu.rc_in_7))
-		return FALSE;
-
 	if(ic_imu_data.ic_imu.rc_in_1 < 700 || ic_imu_data.ic_imu.rc_in_1 > 2300)
 		return FALSE;
 

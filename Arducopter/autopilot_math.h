@@ -166,9 +166,6 @@ static inline int constrain_int(int amt, int low, int high)
 	// floating point errors through any function that uses
 	// constrain_float(). The normal float semantics already handle -Inf
 	// and +Inf
-	if (isnan(amt)) {
-		return (low+high)*0.5f;
-	}
 	return ((amt)<(low)?(low):((amt)>(high)?(high):(amt)));
 }
 

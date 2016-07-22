@@ -290,11 +290,6 @@ void getNavDesiredVelocity(Vector2f desired_vel)
 
 void getPilotDesiredYawRate()
 {
-	if(isnan(rc_in[3]))
-		return;
-
-	if(isinf(rc_in[3]))
-		return;
 
 	if(rc_in[3] < THROTTLE_MIN || rc_in[3] > THROTTLE_MAX)
 		return;
