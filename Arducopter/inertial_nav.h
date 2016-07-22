@@ -202,11 +202,6 @@ void setupHomePositionCV(void);
 void updateINAVGains(void);
 
 /**
- * @brief update the gains of the filter individually for each of the variable
- */
-void updateINAVGainsIndividually(float kp1, float kp2, float kp3);
-
-/**
  * @brief sets the desired postion in the inertial navigation system units in cm
  */
 void setPositionXY(float x, float y);

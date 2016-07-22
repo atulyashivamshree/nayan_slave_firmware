@@ -664,7 +664,8 @@ void initializeGPSHome()
 
 	inav.lon_to_cm_scaling = cosf(ahrs.lat_home*1e-7f*DEG_TO_RAD)*LATLON_TO_CM;
 
-	setupHomePosition();
+	//TODO check this
+//	setupHomePosition();
 }
 
 void setupHomePositionCV()
@@ -866,20 +867,6 @@ void updateINAVGains()
 	debug("Current inav gains k1_z : %f, k2_z : %f, k3_z", inav.k1_z, inav.k2_z, inav.k3_z);
 }
 
-void updateINAVGainsIndividually(float kp1, float kp2, float kp3)
-{
-	debug("Previous inav gains k1_xy : %f, k2_xy : %f, k3_xy", inav.k1_xy, inav.k2_xy, inav.k3_xy);
-	debug("Previous inav gains k1_z : %f, k2_z : %f, k3_z", inav.k1_z, inav.k2_z, inav.k3_z);
-
-	inav.k1_xy = kp1;
-	inav.k2_xy = kp2;
-	inav.k3_xy = kp3;
-
-	debug("Current inav gains k1_xy : %f, k2_xy : %f, k3_xy", inav.k1_xy, inav.k2_xy, inav.k3_xy);
-	debug("Current inav gains k1_z : %f, k2_z : %f, k3_z", inav.k1_z, inav.k2_z, inav.k3_z);
-}
-
-
 void updateINAV(uint32_t del_t)
 {
 	float dt = del_t * 0.001f;
@@ -951,9 +938,9 @@ void updateINAV(uint32_t del_t)
 	// calculate velocity increase adding new acceleration from accelerometers
 	Vector3f velocity_increase;
 	velocity_increase.x = (accel_ef.x + accel_correction_ef.x) * dt;
-	debug_vec2.x = accel_ef.x;
-	debug_vec2.y = accel_correction_ef.x;
-	debug_vec2.z = velocity_increase.x;
+//	debug_vec2.x = accel_ef.x;
+//	debug_vec2.y = accel_correction_ef.x;
+//	debug_vec2.z = velocity_increase.x;
 	velocity_increase.y = (accel_ef.y + accel_correction_ef.y) * dt;
 	velocity_increase.z = (accel_ef.z + inav.accel_correction_hbf.z) * dt;
 

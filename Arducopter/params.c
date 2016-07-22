@@ -38,9 +38,16 @@ const char throttle_hover[16] = "THR_MID";
 const char alt_delay[16] = "ALT_DELAY";
 const char xy_delay[16] = "XY_DELAY";
 
-const char sysid_thismav_index = 0;
-const char sysid_sw_type_index = 1;
-const char sysid_mygcs_index = 2;
+const char k1_xy[16] = "K1_XY";
+const char k2_xy[16] = "K2_XY";
+const char k3_xy[16] = "K3_XY";
+const char k1_z[16] = "K1_Z";
+const char k2_z[16] = "K2_Z";
+const char k3_z[16] = "K3_Z";
+
+const uint8_t sysid_thismav_index = 0;
+const uint8_t sysid_sw_type_index = 1;
+const uint8_t sysid_mygcs_index = 2;
 
 const uint8_t inav_tc_xy_index = 3;
 const uint8_t inav_tc_z_index = 4;
@@ -61,5 +68,11 @@ const uint8_t throttle_hover_index = 16;
 const uint8_t alt_delay_index = 17;
 const uint8_t xy_delay_index = 18;
 
+const uint8_t k1_xy_index = 19;
+const uint8_t k2_xy_index = 20;
+const uint8_t k3_xy_index = 21;
+const uint8_t k1_z_index = 22;
+const uint8_t k2_z_index = 23;
+const uint8_t k3_z_index = 24;
 //void updatePIDFromEEPROM(void);	TODO FUTURE SCOPE
 //void writeDefaultParam(void);		TODO FUTURE SCOPE

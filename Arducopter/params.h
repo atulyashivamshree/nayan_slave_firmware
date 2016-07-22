@@ -39,9 +39,16 @@ extern const char throttle_hover[16];		/**< throttle required in ideal condition
 extern const char alt_delay[16];
 extern const char xy_delay[16];
 
-extern const char sysid_thismav_index;
-extern const char sysid_sw_type_index;
-extern const char sysid_mygcs_index;
+extern const char k1_xy[16];
+extern const char k2_xy[16];
+extern const char k3_xy[16];
+extern const char k1_z[16];
+extern const char k2_z[16];
+extern const char k3_z[16];
+
+extern const uint8_t sysid_thismav_index;
+extern const uint8_t sysid_sw_type_index;
+extern const uint8_t sysid_mygcs_index;
 
 extern const uint8_t inav_tc_xy_index;
 extern const uint8_t inav_tc_z_index;
@@ -63,7 +70,15 @@ extern const uint8_t throttle_hover_index;
 extern const uint8_t alt_delay_index;
 extern const uint8_t xy_delay_index;
 
-#define PARAM_COUNT 19				//total number of parameters to be sent
+extern const uint8_t k1_xy_index;
+extern const uint8_t k2_xy_index;
+extern const uint8_t k3_xy_index;
+extern const uint8_t k1_z_index;
+extern const uint8_t k2_z_index;
+extern const uint8_t k3_z_index;
+
+
+#define PARAM_COUNT 25				//total number of parameters to be sent
 
 //NOTE : IF YOU WANT TO DECLARE FWupdateParamMavLink and FWparamQSend in the .c file then you will have to make comm_ch_send static inside mavlink_helpers.h
 //currently only one instance of the mavlink _helpers is required in the odroid_comm.c file
@@ -335,19 +350,103 @@ void resendParamMavLink(mavlink_channel_t chan, char _name[17], uint8_t param_id
 				 alt_delay_index);		//_queued_parameter_index
 	}
 	if(strcmp(_name, xy_delay) == 0 || xy_delay_index == param_id)
-		{
-			 palSetPad(GPIOC, 12);
-			 chThdSleepMilliseconds(2);
-			 palClearPad(GPIOC, 12);
+	{
+		 palSetPad(GPIOC, 12);
+		 chThdSleepMilliseconds(2);
+		 palClearPad(GPIOC, 12);
 
-			 mavlink_msg_param_value_send(
-					 chan,
-					 xy_delay,
-					 inav.xy_delay, 			//param value
-					 MAVLINK_TYPE_FLOAT,	//param type
-					 PARAM_COUNT,
-					 xy_delay_index);		//_queued_parameter_index
-		}
+		 mavlink_msg_param_value_send(
+				 chan,
+				 xy_delay,
+				 inav.xy_delay, 			//param value
+				 MAVLINK_TYPE_FLOAT,	//param type
+				 PARAM_COUNT,
+				 xy_delay_index);		//_queued_parameter_index
+	}
+	if(strcmp(_name, k1_xy) == 0 || k1_xy_index == param_id)
+	{
+		 palSetPad(GPIOC, 12);
+		 chThdSleepMilliseconds(2);
+		 palClearPad(GPIOC, 12);
+
+		 mavlink_msg_param_value_send(
+				 chan,
+				 k1_xy,
+				 inav.k1_xy, 			//param value
+				 MAVLINK_TYPE_FLOAT,	//param type
+				 PARAM_COUNT,
+				 k1_xy_index);		//_queued_parameter_index
+	}
+	if(strcmp(_name, k2_xy) == 0 || k2_xy_index == param_id)
+	{
+		 palSetPad(GPIOC, 12);
+		 chThdSleepMilliseconds(2);
+		 palClearPad(GPIOC, 12);
+
+		 mavlink_msg_param_value_send(
+				 chan,
+				 k2_xy,
+				 inav.k2_xy, 			//param value
+				 MAVLINK_TYPE_FLOAT,	//param type
+				 PARAM_COUNT,
+				 k2_xy_index);		//_queued_parameter_index
+	}
+	if(strcmp(_name, k3_xy) == 0 || k3_xy_index == param_id)
+	{
+		 palSetPad(GPIOC, 12);
+		 chThdSleepMilliseconds(2);
+		 palClearPad(GPIOC, 12);
+
+		 mavlink_msg_param_value_send(
+				 chan,
+				 k3_xy,
+				 inav.k3_xy, 			//param value
+				 MAVLINK_TYPE_FLOAT,	//param type
+				 PARAM_COUNT,
+				 k3_xy_index);		//_queued_parameter_index
+	}
+	if(strcmp(_name, k1_z) == 0 || k1_z_index == param_id)
+	{
+		 palSetPad(GPIOC, 12);
+		 chThdSleepMilliseconds(2);
+		 palClearPad(GPIOC, 12);
+
+		 mavlink_msg_param_value_send(
+				 chan,
+				 k1_z,
+				 inav.k1_z, 			//param value
+				 MAVLINK_TYPE_FLOAT,	//param type
+				 PARAM_COUNT,
+				 k1_z_index);		//_queued_parameter_index
+	}
+	if(strcmp(_name, k2_z) == 0 || k2_z_index == param_id)
+	{
+		 palSetPad(GPIOC, 12);
+		 chThdSleepMilliseconds(2);
+		 palClearPad(GPIOC, 12);
+
+		 mavlink_msg_param_value_send(
+				 chan,
+				 k2_z,
+				 inav.k2_z, 			//param value
+				 MAVLINK_TYPE_FLOAT,	//param type
+				 PARAM_COUNT,
+				 k2_z_index);		//_queued_parameter_index
+	}
+	if(strcmp(_name, k3_z) == 0 || k3_z_index == param_id)
+	{
+		 palSetPad(GPIOC, 12);
+		 chThdSleepMilliseconds(2);
+		 palClearPad(GPIOC, 12);
+
+		 mavlink_msg_param_value_send(
+				 chan,
+				 k3_z,
+				 inav.k3_z, 			//param value
+				 MAVLINK_TYPE_FLOAT,	//param type
+				 PARAM_COUNT,
+				 k3_z_index);		//_queued_parameter_index
+	}
 
 }
 
@@ -655,6 +754,103 @@ void FWupdateParamMavLink(mavlink_channel_t chan, char _name[17], float _paramVa
 			 PARAM_COUNT,
 			 xy_delay_index);		//_queued_parameter_index
 	}
+	if(strcmp(_name, k1_xy) == 0)
+	{
+		 palSetPad(GPIOC, 12);
+		 chThdSleepMilliseconds(2);
+		 palClearPad(GPIOC, 12);
+
+		 inav.k1_xy = _paramValue;
+
+		 mavlink_msg_param_value_send(
+				 chan,
+				 k1_xy,
+				 inav.k1_xy, 			//param value
+				 MAVLINK_TYPE_FLOAT,	//param type
+				 PARAM_COUNT,
+				 k1_xy_index);		//_queued_parameter_index
+	}
+	if(strcmp(_name, k2_xy) == 0)
+	{
+		 palSetPad(GPIOC, 12);
+		 chThdSleepMilliseconds(2);
+		 palClearPad(GPIOC, 12);
+
+		 inav.k2_xy = _paramValue;
+
+		 mavlink_msg_param_value_send(
+				 chan,
+				 k2_xy,
+				 inav.k2_xy, 			//param value
+				 MAVLINK_TYPE_FLOAT,	//param type
+				 PARAM_COUNT,
+				 k2_xy_index);		//_queued_parameter_index
+	}
+	if(strcmp(_name, k3_xy) == 0)
+	{
+		 palSetPad(GPIOC, 12);
+		 chThdSleepMilliseconds(2);
+		 palClearPad(GPIOC, 12);
+
+		 inav.k3_xy = _paramValue;
+
+		 mavlink_msg_param_value_send(
+				 chan,
+				 k3_xy,
+				 inav.k3_xy, 			//param value
+				 MAVLINK_TYPE_FLOAT,	//param type
+				 PARAM_COUNT,
+				 k3_xy_index);		//_queued_parameter_index
+	}
+
+	if(strcmp(_name, k1_z) == 0)
+	{
+		 palSetPad(GPIOC, 12);
+		 chThdSleepMilliseconds(2);
+		 palClearPad(GPIOC, 12);
+
+		 inav.k1_z = _paramValue;
+
+		 mavlink_msg_param_value_send(
+				 chan,
+				 k1_z,
+				 inav.k1_z, 			//param value
+				 MAVLINK_TYPE_FLOAT,	//param type
+				 PARAM_COUNT,
+				 k1_z_index);		//_queued_parameter_index
+	}
+	if(strcmp(_name, k2_z) == 0)
+	{
+		 palSetPad(GPIOC, 12);
+		 chThdSleepMilliseconds(2);
+		 palClearPad(GPIOC, 12);
+
+		 inav.k2_z = _paramValue;
+
+		 mavlink_msg_param_value_send(
+				 chan,
+				 k2_z,
+				 inav.k2_z, 			//param value
+				 MAVLINK_TYPE_FLOAT,	//param type
+				 PARAM_COUNT,
+				 k2_z_index);		//_queued_parameter_index
+	}
+	if(strcmp(_name, k3_z) == 0)
+	{
+		 palSetPad(GPIOC, 12);
+		 chThdSleepMilliseconds(2);
+		 palClearPad(GPIOC, 12);
+
+		 inav.k3_z = _paramValue;
+
+		 mavlink_msg_param_value_send(
+				 chan,
+				 k3_z,
+				 inav.k3_z, 			//param value
+				 MAVLINK_TYPE_FLOAT,	//param type
+				 PARAM_COUNT,
+				 k3_z_index);		//_queued_parameter_index
+	}
 
 }
 
@@ -788,6 +984,54 @@ void FWparamQSend(mavlink_channel_t chan){
 				 MAVLINK_TYPE_FLOAT,	//param type
 				 PARAM_COUNT,
 				 xy_delay_index);		//_queued_parameter_index
+
+		mavlink_msg_param_value_send(
+				 chan,
+				 k1_xy,
+				 inav.k1_xy, 			//param value
+				 MAVLINK_TYPE_FLOAT,	//param type
+				 PARAM_COUNT,
+				 k1_xy_index);		//_queued_parameter_index
+
+		mavlink_msg_param_value_send(
+				 chan,
+				 k2_xy,
+				 inav.k2_xy, 			//param value
+				 MAVLINK_TYPE_FLOAT,	//param type
+				 PARAM_COUNT,
+				 k2_xy_index);		//_queued_parameter_index
+
+		mavlink_msg_param_value_send(
+				 chan,
+				 k3_xy,
+				 inav.k3_xy, 			//param value
+				 MAVLINK_TYPE_FLOAT,	//param type
+				 PARAM_COUNT,
+				 k3_xy_index);		//_queued_parameter_index
+
+		mavlink_msg_param_value_send(
+				 chan,
+				 k1_z,
+				 inav.k1_z, 			//param value
+				 MAVLINK_TYPE_FLOAT,	//param type
+				 PARAM_COUNT,
+				 k1_z_index);		//_queued_parameter_index
+
+		mavlink_msg_param_value_send(
+				 chan,
+				 k2_z,
+				 inav.k2_z, 			//param value
+				 MAVLINK_TYPE_FLOAT,	//param type
+				 PARAM_COUNT,
+				 k2_z_index);		//_queued_parameter_index
+
+		mavlink_msg_param_value_send(
+				 chan,
+				 k3_z,
+				 inav.k3_z, 			//param value
+				 MAVLINK_TYPE_FLOAT,	//param type
+				 PARAM_COUNT,
+				 k3_z_index);		//_queued_parameter_index
 
 }
 
