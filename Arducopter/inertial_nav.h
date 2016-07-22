@@ -83,6 +83,8 @@ typedef struct
 	Vector3f position; 				/**< position of the vehicle as calculated by the inertial navigation system #position. */
 	Vector3f accel_correction_hbf; 	//bias in accelerometer readings
 
+	uint32_t last_update;
+
 	/******************************
 	 ******** Filter gains ********
 	 *****************************/
@@ -192,12 +194,17 @@ void initializeAlt(void);
 /**
  * @brief sets the position variables to home
  */
-void setupHomePosition(void);
+void setupHomePositionCV(void);
 
 /**
  * @brief update the gains of the complementary filter used to update the inertial navigation data
  */
 void updateINAVGains(void);
+
+/**
+ * @brief update the gains of the filter individually for each of the variable
+ */
+void updateINAVGainsIndividually(float kp1, float kp2, float kp3);
 
 /**
  * @brief sets the desired postion in the inertial navigation system units in cm

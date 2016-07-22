@@ -33,17 +33,16 @@ void runArducopter(uint32_t t_now)
 	uint32_t start = chTimeNow();
 
 	//check whether new data has arrived on imu
-	if(sens_imu.stamp > inav.last_imu_stamp)
+	if(isIMUGlitching() == 0)
 	{
-		if(isIMUGlitching() == 0)
-		{
-			updateAHRS();
-			updateINAV(sens_imu.stamp - inav.last_imu_stamp);
-		}
-		else
-		{
-			return;
-		}
+		updateAHRS();
+		uint32_t del_t = (t_now - inav.last_update);
+		updateINAV(del_t);
+		inav.last_update = t_now;
+	}
+	else
+	{
+		return;
 	}
 
 	//CONDITION FOR RUNNING LOITER to be run only when the switch is pressed on for the HLP code
