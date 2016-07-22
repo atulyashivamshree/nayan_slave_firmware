@@ -44,7 +44,7 @@ float getElemFromLast(float arr[], Queue_property *q_property, int i)
 		i = 0;
 	if(q_property->is_full)
 	{
-		elem = arr[(q_property->last - i + q_property->size)%q_property->size];
+		elem = arr[(q_property->last - 1 - i + q_property->size)%q_property->size];
 	}
 	else
 		elem = arr[q_property->last];

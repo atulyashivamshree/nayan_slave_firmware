@@ -698,8 +698,8 @@ void setThrottleOut(float throttle_in, uint8_t apply_angle_boost)
 
 	if(apply_angle_boost == 1)
 	{
-//		throttle_out = (throttle_in - (THROTTLE_MIN+130-200))*boost_factor + (THROTTLE_MIN+130-200);		//throttle min was 130/1000 from nayan llp parameters
-		throttle_out = (throttle_in - (THROTTLE_MIN+0))*boost_factor + (THROTTLE_MIN+0);
+		throttle_out = (throttle_in - (THROTTLE_MIN+130-300))*boost_factor + (THROTTLE_MIN+130-300);		//throttle min was 130/1000 from nayan llp parameters
+//		throttle_out = (throttle_in - (THROTTLE_MIN+0))*boost_factor + (THROTTLE_MIN+0);
 	}
 	else
 		throttle_out = throttle_in;
