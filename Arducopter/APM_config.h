@@ -600,7 +600,7 @@
 // Velocity (horizontal) gains
 //
 #ifndef VEL_XY_P
- # define VEL_XY_P              1.0f
+ # define VEL_XY_P              1.5f
 #endif
 #ifndef VEL_XY_I
  # define VEL_XY_I              0.5f
@@ -642,12 +642,12 @@
 #endif
 
 #ifndef ALT_HOLD_P
- # define ALT_HOLD_P            1.0f
+ # define ALT_HOLD_P            0.9f
 #endif
 
 // Velocity (vertical) control gains
 #ifndef VEL_Z_P
- # define VEL_Z_P       5.0f
+ # define VEL_Z_P       6.0f
 #endif
 
 // Accel (vertical) control gains
@@ -655,7 +655,7 @@
  # define ACCEL_Z_P     0.5f
 #endif
 #ifndef ACCEL_Z_I
- # define ACCEL_Z_I     1.0f
+ # define ACCEL_Z_I     0.4f
 #endif
 #ifndef ACCEL_Z_D
  # define ACCEL_Z_D     0.0f
@@ -664,7 +664,7 @@
  # define ACCEL_Z_IMAX  400			//IGNORE changed by atulya
 #endif
 #ifndef ACCEL_Z_FILT_HZ
- # define ACCEL_Z_FILT_HZ   20.0f
+ # define ACCEL_Z_FILT_HZ   10.0f
 #endif
 
 // default maximum vertical velocity and acceleration the pilot may request

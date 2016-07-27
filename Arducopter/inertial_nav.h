@@ -47,8 +47,8 @@
 	#define POSTARGET_MIN_ALTITUDE					-1000
 #else
 	#define AP_HISTORIC_Z_SIZE						40
-//	#define ALT_DELAY								COUNT_Z_DELAY_SONAR
-	#define ALT_DELAY								COUNT_DELAY_EKF
+	#define ALT_DELAY								COUNT_Z_DELAY_SONAR
+//	#define ALT_DELAY								COUNT_DELAY_EKF
 	#define AP_INTERTIALNAV_TC_Z    				1.0f // default time constant for complementary filter's Z axis
 	#define POSTARGET_MAX_ALTITUDE					250
 	#define POSTARGET_MIN_ALTITUDE					50
