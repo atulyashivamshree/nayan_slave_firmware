@@ -20,6 +20,10 @@ Implements Loiter Code from ArduCopter on the nayan HLP
 * `position_controller.h` - implements position controller
 * `wp_nav.h` - Handles loiter and waypoint navigation
 
+## Compatibility:
+* `v0.1` - works with v0.1 of cv_sens and present in nayan_v2015 branch Does not work with mavros version after Mar 2016
+* `v0.2` - Last tested version of code on Nayan-NUC, Inforce, Odroid boards. Works with `v0.2` of cv_sens and the master branch
+
 ###Flashing on the Slave Firmware
 [Slave_Processor_Setup](http://aus.co.in/wiki/Slave_Processor_Setup)
 
